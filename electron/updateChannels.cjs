@@ -15,7 +15,7 @@ const RELEASE_CHANNELS = {
     label: 'Limo',
     updaterChannel: 'beta',
     allowPrerelease: true,
-    updateEnabled: true,
+    updateEnabled: false,
     rollingReleaseTag: 'limo',
   },
   cielo: {
@@ -23,7 +23,7 @@ const RELEASE_CHANNELS = {
     label: 'Cielo',
     updaterChannel: 'alpha',
     allowPrerelease: true,
-    updateEnabled: true,
+    updateEnabled: false,
     rollingReleaseTag: 'cielo',
   },
   internal: {
