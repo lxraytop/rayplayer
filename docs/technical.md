@@ -7,7 +7,7 @@
 
 ## 桌面端说明
 
-桌面版内置前后端运行环境，适合希望即装即用的用户。最新版本请前往 [Releases 页面](https://github.com/角完/ray-player/releases)。
+桌面版内置前后端运行环境，适合希望即装即用的用户。最新版本请前往 [Releases 页面](https://github.com/lxraytop/rayplayer/releases)。
 
 ### 发布与更新通道
 
@@ -84,7 +84,7 @@ Ray 提供了从外部与播放器进行交互的 Stage API，从而可以实现
 
 如果你希望快速上线 Web 版本，可以直接通过下方入口创建 Vercel 项目：
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/角完/ray-player)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/lxraytop/rayplayer)
 
 部署完成后，请在 Vercel 项目设置中补齐环境变量。
 

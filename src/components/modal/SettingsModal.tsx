@@ -1280,7 +1280,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                                             >
                                                 {t('help.madeBy') || "Made by"}
                                             </button>{' '}
-                                            <a href="https://github.com/角完/ray-player" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors underline decoration-white/30 hover:decoration-white">角完/ray-player</a>
+                                            <a href="https://github.com/lxraytop/rayplayer" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors underline decoration-white/30 hover:decoration-white">lxraytop/rayplayer</a>
                                         </p>
                                     </div>
                                     <div className="flex flex-col items-center gap-2 mt-6 mb-2 text-xs font-mono text-center">

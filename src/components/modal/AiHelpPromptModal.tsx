@@ -8,7 +8,7 @@ import type { Theme } from '../../types';
 
 const FOLIA_GUIDE_URL = 'https://ray-site.cielaniska.top/guide/llm-routing';
 const FOLIA_DOCS_URL = 'https://ray-site.cielaniska.top/guide/';
-const FOLIA_REPOSITORY_URL = 'https://github.com/角完/ray-player';
+const FOLIA_REPOSITORY_URL = 'https://github.com/lxraytop/rayplayer';
 
 type AiHelpPromptModalProps = {
     isOpen: boolean;

@@ -12,7 +12,6 @@ const {
         releaseChannel: {
             updaterChannel: string | null;
             updateEnabled: boolean;
-            rollingReleaseTag: string | null;
         },
         github: { owner: string; repo: string },
     ) => Record<string, unknown> | null;
@@ -21,61 +20,43 @@ const {
         updaterChannel: string | null;
         allowPrerelease: boolean;
         updateEnabled: boolean;
-        rollingReleaseTag: string | null;
     };
 };
 
 describe('release update channels', () => {
-    it('uses packaged metadata before inferring a legacy version suffix', () => {
-        expect(resolveReleaseChannel('0.7.0-beta.1', 'internal')).toMatchObject({
-            id: 'internal',
-            updaterChannel: null,
-            updateEnabled: false,
+    it('always resolves to the stable channel regardless of version suffix', () => {
+        expect(resolveReleaseChannel('1.1.0')).toMatchObject({
+            id: 'stable',
+            updaterChannel: 'latest',
+            updateEnabled: true,
+            allowPrerelease: false,
         });
     });
 
-    it.each([
-        ['0.7.0', 'realeco', 'latest', false],
-        ['0.7.0-beta.123', 'limo', 'beta', true],
-        ['0.7.0-alpha.123', 'cielo', 'alpha', true],
-    ])('maps %s to the %s lane', (version, id, updaterChannel, allowPrerelease) => {
-        expect(resolveReleaseChannel(version)).toMatchObject({ id, updaterChannel, allowPrerelease });
-    });
-
-    it('opens rolling prereleases instead of manufacturing a semver tag', () => {
-        const releasesUrl = 'https://github.com/角完/ray-player/releases';
-
-        expect(getReleaseUrl('limo', '0.7.0-beta.123', releasesUrl)).toBe(`${releasesUrl}/tag/limo`);
-        expect(getReleaseUrl('cielo', '0.7.0-alpha.123', releasesUrl)).toBe(`${releasesUrl}/tag/cielo`);
-        expect(getReleaseUrl('realeco', '0.7.0', releasesUrl)).toBe(`${releasesUrl}/tag/v0.7.0`);
-    });
-
-    it('reads rolling prerelease metadata directly instead of using the GitHub release feed', () => {
-        const github = { owner: '角完', repo: 'ray-player' };
-
-        expect(getUpdateProviderConfig(resolveReleaseChannel('0.7.0-beta.123', 'limo'), github)).toEqual({
-            provider: 'generic',
-            url: 'https://github.com/角完/ray-player/releases/download/limo/',
-            channel: 'beta',
-            useMultipleRangeRequest: false,
-        });
-        expect(getUpdateProviderConfig(resolveReleaseChannel('0.7.0-alpha.123', 'cielo'), github)).toEqual({
-            provider: 'generic',
-            url: 'https://github.com/角完/ray-player/releases/download/cielo/',
-            channel: 'alpha',
-            useMultipleRangeRequest: false,
+    it('ignores declared channel and always returns stable', () => {
+        expect(resolveReleaseChannel('1.1.0', 'anything')).toMatchObject({
+            id: 'stable',
+            updateEnabled: true,
         });
     });
 
-    it('restores the GitHub provider after switching back to Realeco', () => {
-        expect(getUpdateProviderConfig(
-            resolveReleaseChannel('0.7.0', 'realeco'),
-            { owner: '角完', repo: 'ray-player' },
-        )).toEqual({
+    it('builds a semver release URL', () => {
+        const releasesUrl = 'https://github.com/lxraytop/rayplayer/releases';
+        expect(getReleaseUrl('stable', '1.1.0', releasesUrl)).toBe(`${releasesUrl}/tag/v1.1.0`);
+    });
+
+    it('returns GitHub provider config for stable channel', () => {
+        const github = { owner: 'lxraytop', repo: 'rayplayer' };
+        expect(getUpdateProviderConfig(resolveReleaseChannel('1.1.0', 'stable'), github)).toEqual({
             provider: 'github',
-            owner: '角完',
-            repo: 'ray-player',
+            owner: 'lxraytop',
+            repo: 'rayplayer',
             channel: 'latest',
         });
+    });
+
+    it('returns null for disabled channel', () => {
+        const github = { owner: 'lxraytop', repo: 'rayplayer' };
+        expect(getUpdateProviderConfig({ updaterChannel: null, updateEnabled: false }, github)).toBeNull();
     });
 });

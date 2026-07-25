@@ -1,6 +1,5 @@
 // test/manual/issue125-inject-invalid-embedded-cover.js
 // 粘贴到 Ray 的 devtools 窗口的 console 里面，然后点击 本地 -> All songs，在 v0.5.22版本之前应该可以触发黑屏崩溃
-// https://github.com/Akarin520/ray-player/issues/125
 // 此脚本修改本地 indexedDB 中一首歌的 embeddedCover 为 plain object，从而复现此问题
 
 (async () => {
