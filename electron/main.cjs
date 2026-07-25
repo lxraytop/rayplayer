@@ -1155,13 +1155,7 @@ function normalizeVersion(value) {
 }
 
 function getPackagedReleaseChannel() {
-  try {
-    const packageJsonPath = path.join(app.getAppPath(), 'package.json');
-    const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
-    return packageJson.rayReleaseChannel;
-  } catch {
-    return null;
-  }
+  return 'stable';
 }
 
 function getCurrentReleaseChannel() {
@@ -1173,7 +1167,7 @@ function getCurrentReleaseChannel() {
 
 function normalizeUpdateChannelSelection(value) {
   const channel = typeof value === 'string' ? value.trim().toLowerCase() : '';
-  return channel === 'realeco' || channel === 'limo' || channel === 'cielo' ? channel : null;
+  return channel === 'stable' ? 'stable' : 'stable';
 }
 
 function getUpdateCheckSupportReason() {

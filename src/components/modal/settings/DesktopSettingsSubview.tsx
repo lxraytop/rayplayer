@@ -33,7 +33,7 @@ type ElectronSettingsState = {
     USE_SYSTEM_PROXY_FOR_AI: boolean;
     ENABLE_UPDATE_CHECK: boolean;
     ENABLE_AUTO_UPDATE: boolean;
-    UPDATE_CHANNEL: 'realeco' | 'limo' | 'cielo' | 'internal';
+    UPDATE_CHANNEL: 'stable';
     STAGE_MODE_SOURCE: string;
     DISCORD_RICH_PRESENCE_ENABLED: boolean;
 };
@@ -69,7 +69,7 @@ export type DesktopSettingsModel = {
     onDownloadUpdate: () => Promise<void> | void;
     onInstallUpdate: () => Promise<void> | void;
     onOpenChinaDownload: () => Promise<void> | void;
-    onUpdateChannelChange: (channel: 'realeco' | 'limo' | 'cielo') => Promise<void> | void;
+    onUpdateChannelChange: (channel: 'stable') => Promise<void> | void;
     onSaveElectronSettings: () => Promise<void> | void;
     onToggleAutoUpdate: () => Promise<void> | void;
     onToggleUpdateCheck: () => Promise<void> | void;
@@ -295,23 +295,9 @@ const DesktopSettingsSubview: React.FC<DesktopSettingsSubviewProps> = ({
                                 </p>
                             </div>
                         </div>
-                        <div className="w-44 shrink-0">
-                            <CustomSelect
-                                value={electronSettings.UPDATE_CHANNEL}
-                                onChange={(value) => void onUpdateChannelChange(value as 'realeco' | 'limo' | 'cielo')}
-                                disabled={electronSettings.UPDATE_CHANNEL === 'internal'}
-                                isDaylight={isDaylight}
-                                theme={theme}
-                                ariaLabel={t('options.updateChannel')}
-                                options={electronSettings.UPDATE_CHANNEL === 'internal'
-                                    ? [{ value: 'internal', label: t('options.updateChannelInternal') }]
-                                    : [
-                                        { value: 'realeco', label: t('options.updateChannelRealeco') },
-                                        { value: 'limo', label: t('options.updateChannelLimo') },
-                                        { value: 'cielo', label: t('options.updateChannelCielo') },
-                                    ]}
-                            />
-                        </div>
+                        <div className="w-44 shrink-0 text-right">
+                                <span className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>{t('options.updateChannelStable') || '正式版'}</span>
+                            </div>
                     </div>
 
                     <div className="flex items-center justify-between p-4 gap-4 hover:bg-black/[0.01] dark:hover:bg-white/[0.01] transition-colors">
@@ -413,7 +399,7 @@ const DesktopSettingsSubview: React.FC<DesktopSettingsSubviewProps> = ({
                                 <ExternalLink size={14} />
                                 {t('options.openReleasePage') || 'Open Release Page'}
                             </button>
-                            {electronSettings.UPDATE_CHANNEL === 'realeco' && updateStatus.platform !== 'linux' && (
+                            {electronSettings.UPDATE_CHANNEL === 'stable' && updateStatus.platform !== 'linux' && (
                                 <button
                                     type="button"
                                     onClick={onOpenChinaDownload}

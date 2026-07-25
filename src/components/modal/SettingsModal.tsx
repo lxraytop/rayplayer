@@ -69,13 +69,7 @@ interface SettingsModalProps {
 }
 
 const QUARK_DOWNLOAD_URL = 'https://pan.quark.cn/s/6e4c6fa3bc6f';
-const DEFAULT_UPDATE_CHANNEL: 'realeco' | 'limo' | 'cielo' | 'internal' = __APP_RELEASE_CHANNEL__ === 'limo'
-    ? 'limo'
-    : __APP_RELEASE_CHANNEL__ === 'cielo'
-        ? 'cielo'
-        : __APP_RELEASE_CHANNEL__ === 'internal'
-            ? 'internal'
-            : 'realeco';
+const DEFAULT_UPDATE_CHANNEL = 'stable';
 
 const SettingsModal: React.FC<SettingsModalProps> = ({
     onClose,
@@ -357,12 +351,12 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
         OPENAI_API_URL: '',
         OPENAI_API_MODEL: '',
         OPENAI_API_TEMPERATURE: DEFAULT_OPENAI_TEMPERATURE,
-        AI_PROVIDER: 'gemini',
+        AI_PROVIDER: 'gemini' as string,
         USE_SYSTEM_PROXY_FOR_AI: false,
         ENABLE_UPDATE_CHECK: true,
         ENABLE_AUTO_UPDATE: false,
-        UPDATE_CHANNEL: DEFAULT_UPDATE_CHANNEL,
-        STAGE_MODE_SOURCE: 'stage-api',
+        UPDATE_CHANNEL: 'stable' as 'stable',
+        STAGE_MODE_SOURCE: 'stage-api' as string,
         DISCORD_RICH_PRESENCE_ENABLED: false,
     });
     const [electronSaveStatus, setElectronSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle');
@@ -374,7 +368,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
     const [stageActionStatus, setStageActionStatus] = useState<'idle' | 'regenerating'>('idle');
     const configuredAiProvider = isElectron ? electronSettings.AI_PROVIDER : import.meta.env.VITE_AI_PROVIDER;
     const aiServiceLabel = configuredAiProvider === 'openai' ? 'OpenAI Compatible' : 'Google Gemini';
-    const showQuarkDownload = electronSettings.UPDATE_CHANNEL === 'realeco';
+    const showQuarkDownload = electronSettings.UPDATE_CHANNEL === 'stable';
     useEffect(() => {
         if ((window as any).electron) {
             setIsElectron(true);
@@ -560,18 +554,8 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
         }
     };
 
-    const handleUpdateChannelChange = async (channel: 'realeco' | 'limo' | 'cielo') => {
-        if (!window.electron?.saveSettings) {
-            return;
-        }
-
-        setElectronSettings((current) => ({ ...current, UPDATE_CHANNEL: channel }));
-        await window.electron.saveSettings('UPDATE_CHANNEL', channel);
-
-        const status = await window.electron.getUpdateStatus?.();
-        if (status) {
-            setUpdateStatus(status);
-        }
+    const handleUpdateChannelChange = async (_channel: string) => {
+        // Only stable channel is supported.
     };
 
     const isMac = typeof navigator !== 'undefined' && navigator.userAgent.toLowerCase().includes('mac');

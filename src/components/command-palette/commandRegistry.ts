@@ -281,7 +281,7 @@ export const COMMAND_PALETTE_COMMANDS: CommandPaletteCommand[] = [
         },
     },
     createSettingsCommand('settings-desktop', 'Desktop settings', 'Open desktop app settings', ['desktop', 'electron', '桌面', '桌面端', 'zhuomian', 'zhuomianduan', 'zm', 'zmd'], 'options', 'desktop'),
-    createSettingsCommand('settings-update-channel', 'Update channel', 'Choose the desktop app release channel', ['update channel', 'release channel', 'realeco', 'limo', 'cielo', '更新通道', '发布通道', 'gengxintongdao', 'fabutongdao', 'gxtd', 'fbtd'], 'options', 'desktop'),
+    createSettingsCommand('settings-update-channel', 'Update channel', 'Choose the desktop app release channel', ['update channel', 'release channel', '更新通道', '发布通道', 'gengxintongdao', 'fabutongdao', 'gxtd', 'fbtd'], 'options', 'desktop'),
     {
         id: 'desktop-toggle-voice-input-pause',
         group: 'settings',

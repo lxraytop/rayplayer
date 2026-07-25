@@ -184,8 +184,8 @@ export default async function viteConfig({ mode }: ConfigEnv): Promise<UserConfi
     }
   }
 
-  const appVersionLabel = process.env.APP_VERSION_LABEL?.trim() || 'Realeco';
-  const appReleaseChannel = process.env.APP_RELEASE_CHANNEL?.trim().toLowerCase() || 'realeco';
+  const appVersionLabel = process.env.APP_VERSION_LABEL?.trim() || 'stable';
+  const appReleaseChannel = process.env.APP_RELEASE_CHANNEL?.trim().toLowerCase() || 'stable';
 
   return {
     base: process.env.ELECTRON === 'true' ? './' : '/',
