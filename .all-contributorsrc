@@ -1,0 +1,16 @@
+{
+  "projectName": "folia-major",
+  "projectOwner": "角完",
+  "repoType": "",
+  "repoHost": "",
+  "files": [
+    "CONTRIBUTORS.md"
+  ],
+  "imageSize": 100,
+  "contributorsPerLine": 7,
+  "contributors": [],
+  "commit": false,
+  "commitConvention": "none",
+  "skipCi": true,
+  "commitType": "docs"
+}
