@@ -1,0 +1,32 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="ray_gradient" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#6366f1"/>
+      <stop offset="1" stop-color="#a78bfa"/>
+    </linearGradient>
+    <filter id="dropShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="10"/>
+      <feOffset dx="4" dy="8" result="offsetblur"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.3"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background: Rounded Square -->
+  <rect x="32" y="32" width="448" height="448" rx="120" fill="url(#ray_gradient)" />
+
+  <!-- Bold R Letter -->
+  <g filter="url(#dropShadow)">
+    <!-- Vertical Stem -->
+    <path d="M148 120 H196 C210 120 220 130 220 144 V368 C220 382 210 392 196 392 H148 C134 392 124 382 124 368 V144 C124 130 134 120 148 120 Z" fill="white"/>
+    <!-- Top Bowl -->
+    <path d="M210 120 H300 C345 120 380 152 380 195 C380 238 345 270 300 270 H210 V222 H290 C315 222 332 210 332 195 C332 180 315 168 290 168 H210 V120 Z" fill="white"/>
+    <!-- Diagonal Leg -->
+    <path d="M260 258 L360 370 C370 381 370 398 358 408 L322 408 C312 408 302 402 296 392 L210 270 H260 Z" fill="white"/>
+  </g>
+</svg>
