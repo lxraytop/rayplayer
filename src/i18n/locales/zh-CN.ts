@@ -1217,7 +1217,7 @@ export default {
   },
   "releaseNotes": {
     "v0_6_5": {
-      "intro": "以下是 1.2.0 的新功能与改进",
+      "intro": "以下是 1.2.1 的新功能与改进",
       "lyricPreview": {
         "title": "歌词动画预览改进",
         "description": "歌词动画样式设置新增预览窗口暂停功能，并提供一套全新的占位符歌词。"

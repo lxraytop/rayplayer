@@ -1065,7 +1065,7 @@ export default {
   },
   "releaseNotes": {
     "v0_6_5": {
-      "intro": "Berikut fitur dan peningkatan baru pada versi 1.2.0.",
+      "intro": "Berikut fitur dan peningkatan baru pada versi 1.2.1.",
       "lyricPreview": {
         "title": "Pratinjau Animasi Lirik yang Ditingkatkan",
         "description": "Pengaturan gaya animasi lirik kini memiliki kontrol jeda untuk pratinjau dan satu set lirik placeholder baru."

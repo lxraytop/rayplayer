@@ -1,12 +1,12 @@
 {
   "name": "ray-player",
   "productName": "Ray",
-  "description": "Lyrics Reimagine",
+  "description": "Enjoy music with Ray",
   "author": {
     "name": "角完"
   },
   "private": true,
-  "version": "1.2.0",
+  "version": "1.2.1",
   "license": "AGPL-3.0",
   "type": "module",
   "main": "electron/main.cjs",
