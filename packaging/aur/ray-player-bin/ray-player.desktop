@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Ray
+Comment=Lyrics Reimagine
+Exec=ray-player
+Icon=ray-player
+Terminal=false
+Type=Application
+Categories=AudioVideo;Player;
+StartupWMClass=Ray

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Prepare Ray Release"
+  short_description: "Prepare Ray stable release metadata"
+  default_prompt: "Use $prepare-ray-release to prepare the next stable Ray release and return paste-ready Markdown release notes."
