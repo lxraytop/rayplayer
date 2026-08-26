@@ -2,7 +2,7 @@
 
 这份文档收纳仓库 README 中较细的部署、开发、桌面端和技术栈说明。更完整的使用指南也可以访问专门的文档站点：
 
-- [Ray Guide](https://folia-site.cielaniska.top/guide/)
+- [Ray Guide](https://ray-site.cielaniska.top/guide/)
 - [Stage API 文档](../test/manual/stage-client/README.md)
 
 ## 桌面端说明
@@ -108,7 +108,7 @@ GET http://127.0.0.1:32109/v1/lyric
 
 ### 一键部署到 Vercel
 
-如果你希望快速上线 Web 版本，可以阅读 [Vercel 部署指南](https://folia-site.cielaniska.top/guide/deploy-vercel) 来创建项目。部署完成后，请在 Vercel 项目设置中补齐环境变量。
+如果你希望快速上线 Web 版本，可以阅读 [Vercel 部署指南](https://ray-site.cielaniska.top/guide/deploy-vercel) 来创建项目。部署完成后，请在 Vercel 项目设置中补齐环境变量。
 
 ### 本地开发
 

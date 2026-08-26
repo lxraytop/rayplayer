@@ -80,7 +80,7 @@ VITE_QQ_API_BASE=/api/qq
 QQ_SESSION_SECRET=<刚才生成的随机密钥>
 ```
 
-如果还需要配置其他在线音源或可选功能，请继续按照 [Ray Web 版部署指南](https://folia-site.cielaniska.top/guide/deploy-vercel) 填写对应变量。
+如果还需要配置其他在线音源或可选功能，请继续按照 [Ray Web 版部署指南](https://ray-site.cielaniska.top/guide/deploy-vercel) 填写对应变量。
 
 ### 第 3 步：重新部署
 

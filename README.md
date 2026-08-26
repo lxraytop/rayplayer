@@ -16,7 +16,7 @@ Lyrics Reimagined // 辞曲新境
 
 [获取方式](https://github.com/lxraytop/rayplayer#%E8%8E%B7%E5%8F%96%E6%96%B9%E5%BC%8F)
 ·
-[使用指南](https://folia-site.cielaniska.top/guide/)
+[使用指南](https://ray-site.cielaniska.top/guide/)
 ·
 [技术说明](docs/technical.md)
 
@@ -42,12 +42,12 @@ Ray 是一款以全屏沉浸式歌词播放为核心的在线音乐播放器，�
 ## 获取方式
 
 - **桌面端**：前往 [Releases](https://github.com/lxraytop/rayplayer/releases/latest) 下载 Windows / macOS / Linux 安装包；Arch Linux 用户可通过 AUR 安装 `ray-player-bin`。
-- **Web 端**：阅读 [Vercel 部署指南](https://folia-site.cielaniska.top/guide/deploy-vercel) 一键部署，或参考 [QQ 音乐部署指南](docs/qq-music-deployment.md) 与 [Docker Compose 全栈部署](deploy/docker/README.md)。
-- **Sync Server**：可选同步服务，用于多设备同步外观与 AI 主题库，支持 Cloudflare Workers / Docker / Node.js 自托管，详见 [部署指南](https://folia-site.cielaniska.top/guide/deploy-sync)。
+- **Web 端**：阅读 [Vercel 部署指南](https://ray-site.cielaniska.top/guide/deploy-vercel) 一键部署，或参考 [QQ 音乐部署指南](docs/qq-music-deployment.md) 与 [Docker Compose 全栈部署](deploy/docker/README.md)。
+- **Sync Server**：可选同步服务，用于多设备同步外观与 AI 主题库，支持 Cloudflare Workers / Docker / Node.js 自托管，详见 [部署指南](https://ray-site.cielaniska.top/guide/deploy-sync)。
 
 ## 文档与开发
 
-使用说明见 [Ray Guide](https://folia-site.cielaniska.top/guide/)；部署、环境变量、本地开发、Stage API 与技术栈见 [技术与开发说明](docs/technical.md)。
+使用说明见 [Ray Guide](https://ray-site.cielaniska.top/guide/)；部署、环境变量、本地开发、Stage API 与技术栈见 [技术与开发说明](docs/technical.md)。
 
 ## Community
 

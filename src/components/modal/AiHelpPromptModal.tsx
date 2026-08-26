@@ -6,8 +6,8 @@ import type { Theme } from '../../types';
 
 // src/components/modal/AiHelpPromptModal.tsx
 
-const RAY_GUIDE_URL = 'https://folia-site.cielaniska.top/guide/llm-routing';
-const RAY_DOCS_URL = 'https://folia-site.cielaniska.top/guide/';
+const RAY_GUIDE_URL = 'https://ray-site.cielaniska.top/guide/llm-routing';
+const RAY_DOCS_URL = 'https://ray-site.cielaniska.top/guide/';
 const RAY_REPOSITORY_URL = 'https://github.com/lxraytop/rayplayer';
 
 type AiHelpPromptModalProps = {
