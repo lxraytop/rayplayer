@@ -13,6 +13,7 @@ import { deleteSongsByIds, removeImportedRoot, resyncFolder } from '../../../ser
 import { loadLocalLibraryDirectoryTrees } from '../../../services/localLibraryDirectoryTree';
 import type { GridMapBatchConfig, GridMapBatchContext, GridMapDirectoryNode } from '../../ray-grid/gridMapBatch';
 import type { SongResult } from '../../../types';
+import { useLibraryViewModeStore } from '../../../stores/useLibraryViewModeStore';
 
 // src/components/app/home/LocalGrid3DView.tsx
 // Desktop-only local music Grid3D overview that opens GridView instead of legacy carousel details.
@@ -81,6 +82,9 @@ export const LocalGrid3DView: React.FC<LocalGrid3DViewProps> = ({
     isInteractive = true,
 }) => {
     const { t } = useTranslation();
+    // Shared home card / list layout, driven by the same store state as the online home grid.
+    const homeViewMode = useLibraryViewModeStore(state => state.homeViewMode);
+    const setHomeViewMode = useLibraryViewModeStore(state => state.setHomeViewMode);
     const playlistFileInputRef = useRef<HTMLInputElement>(null);
     const [directoryTrees, setDirectoryTrees] = useState<GridMapDirectoryNode[]>([]);
     const [directoryTreesLoaded, setDirectoryTreesLoaded] = useState(false);
@@ -309,6 +313,8 @@ export const LocalGrid3DView: React.FC<LocalGrid3DViewProps> = ({
                 hasFloatingPlayer={hasFloatingPlayer}
                 playlistVisibilityScope="local"
                 batchConfig={localBatchConfig}
+                viewMode={homeViewMode}
+                onViewModeChange={setHomeViewMode}
             />
         </>
     );
