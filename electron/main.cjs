@@ -8,6 +8,7 @@ const crypto = require('crypto');
 const { createStageApi } = require('./stageApi.cjs');
 const { createWindowPlaybackHandoffStore } = require('./windowPlaybackHandoff.cjs');
 const wallpaperWatchdogModule = require('./wallpaperWatchdog.cjs');
+const windowsWallpaperModule = require('./windowsWallpaper.cjs');
 const { createKugouApiBridge } = require('./kugouApiBridge.cjs');
 const { createQqAuthSessionRepository } = require('./qqAuthSessionRepository.cjs');
 const { DEFAULT_DISCORD_APPLICATION_ID, createDiscordPresenceController } = require('./discordPresence.cjs');
@@ -256,6 +257,185 @@ function scheduleWallpaperModeRelaunch(nextEnabled) {
     }
     relaunchForWallpaperModeChange(nextEnabled);
   }, 300);
+}
+
+// --- Windows desktop wallpaper mode -------------------------------------------------------------
+// Windows cannot reuse the Linux window-type / windowtolayer paths, so the lyric animation is
+// rendered into a dedicated transparent, always-on-bottom window that hosts the existing OBS browser
+// source URL. Keeping the OBS channel as the single data pipeline means a wallpaper behaves exactly
+// like an OBS browser source and needs no separate renderer or transport.
+let windowsWallpaperWindow = null;
+let windowsWallpaperDisplayListenerBound = false;
+
+// The wallpaper window is an internal consumer of the OBS browser source channel, so that channel
+// must stay available even when the user has not enabled the OBS browser source themselves.
+function isWindowsWallpaperChannelNeeded() {
+  return windowsWallpaperModule.isWindowsWallpaperSupported(process.platform) && isWallpaperModeEnabled();
+}
+
+function applyWindowsWallpaperBounds(win) {
+  if (!win || win.isDestroyed()) {
+    return;
+  }
+  const { x, y, width, height } = screen.getPrimaryDisplay().bounds;
+  win.setBounds({ x, y, width, height });
+}
+
+// Best-effort: reparent the window behind the desktop icons. If the helper cannot run (missing
+// PowerShell, restricted policy) the window simply stays as a normal always-on-bottom layer.
+function sinkWindowsWallpaperWindow(win) {
+  if (!win || win.isDestroyed()) {
+    return;
+  }
+
+  let hwnd = null;
+  try {
+    hwnd = windowsWallpaperModule.readHwndFromHandleBuffer(win.getNativeWindowHandle());
+  } catch (error) {
+    console.warn('[Wallpaper] Unable to read native window handle', error);
+    return;
+  }
+
+  const script = windowsWallpaperModule.buildSinkToDesktopPowerShellCommand(hwnd);
+  if (!script) {
+    return;
+  }
+
+  const child = spawn('powershell.exe', ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-Command', script], { windowsHide: true });
+  child.once('error', (error) => {
+    console.warn('[Wallpaper] Desktop sink helper failed to start; keeping always-on-bottom layer', error);
+  });
+  child.once('exit', (code) => {
+    if (code === 0) {
+      console.log('[Wallpaper] Window sunk behind desktop icons');
+    } else {
+      console.warn(`[Wallpaper] Desktop sink helper exited with code ${code}; keeping always-on-bottom layer`);
+    }
+  });
+}
+
+function destroyWindowsWallpaperWindow() {
+  if (!windowsWallpaperWindow) {
+    return;
+  }
+
+  const win = windowsWallpaperWindow;
+  windowsWallpaperWindow = null;
+  if (!win.isDestroyed()) {
+    win.destroy();
+  }
+}
+
+async function createWindowsWallpaperWindow() {
+  if (!windowsWallpaperModule.isWindowsWallpaperSupported(process.platform)) {
+    return null;
+  }
+  if (windowsWallpaperWindow && !windowsWallpaperWindow.isDestroyed()) {
+    applyWindowsWallpaperBounds(windowsWallpaperWindow);
+    return windowsWallpaperWindow;
+  }
+
+  try {
+    await startObsBrowserSourceServerIfNeeded();
+  } catch (error) {
+    console.error('[Wallpaper] Failed to prepare the OBS browser source channel', error);
+  }
+
+  const sourceUrl = buildObsBrowserSourceUrl();
+  if (!sourceUrl) {
+    console.warn('[Wallpaper] OBS browser source channel unavailable; skipping wallpaper window');
+    return null;
+  }
+
+  const { x, y, width, height } = screen.getPrimaryDisplay().bounds;
+  const win = new BrowserWindow({
+    x,
+    y,
+    width,
+    height,
+    frame: false,
+    transparent: true,
+    resizable: false,
+    movable: false,
+    minimizable: false,
+    maximizable: false,
+    fullscreenable: false,
+    skipTaskbar: true,
+    focusable: false,
+    hasShadow: false,
+    show: false,
+    enableLargerThanScreen: true,
+    backgroundColor: '#00000000',
+    webPreferences: {
+      preload: path.join(__dirname, 'preload.cjs'),
+      nodeIntegration: false,
+      contextIsolation: true,
+      webSecurity: true,
+      backgroundThrottling: false,
+    },
+  });
+
+  // Non-interactive wallpaper: it must never steal focus or swallow desktop clicks.
+  win.setAlwaysOnBottom(true);
+  win.setIgnoreMouseEvents(true);
+  win.setSkipTaskbar(true);
+
+  win.once('ready-to-show', () => {
+    applyWindowsWallpaperBounds(win);
+    if (!win.isDestroyed()) {
+      win.showInactive();
+      sinkWindowsWallpaperWindow(win);
+    }
+  });
+
+  win.on('closed', () => {
+    if (windowsWallpaperWindow === win) {
+      windowsWallpaperWindow = null;
+    }
+  });
+
+  try {
+    await win.loadURL(sourceUrl);
+  } catch (error) {
+    // A failed load (server raced ahead of us, port conflict) must not leave a dead transparent
+    // window on the desktop, and must not surface as an unhandled rejection.
+    console.error('[Wallpaper] Failed to load the wallpaper source', error);
+    if (!win.isDestroyed()) {
+      win.destroy();
+    }
+    return null;
+  }
+
+  windowsWallpaperWindow = win;
+
+  if (!windowsWallpaperDisplayListenerBound) {
+    windowsWallpaperDisplayListenerBound = true;
+    screen.on('display-metrics-changed', () => applyWindowsWallpaperBounds(windowsWallpaperWindow));
+  }
+
+  return win;
+}
+
+// Single entry point that reconciles the wallpaper window with the persisted wallpaper_mode setting.
+// Called on startup and whenever the setting changes so the window follows the toggle without a
+// full process relaunch (unlike the Linux path).
+async function syncWindowsWallpaperWindow() {
+  if (!isWindowsWallpaperChannelNeeded()) {
+    destroyWindowsWallpaperWindow();
+    // The wallpaper window may have been the only reason the OBS channel was running; release it
+    // unless the user enabled the OBS browser source themselves.
+    if (!isObsBrowserSourceEnabled()) {
+      try {
+        await stopObsBrowserSourceServer();
+      } catch (error) {
+        console.warn('[Wallpaper] Failed to release the OBS browser source channel', error);
+      }
+    }
+    return false;
+  }
+
+  const win = await createWindowsWallpaperWindow();
+  return Boolean(win);
 }
 
 // Startup wrapper: only the main process reaches main.cjs (GPU/renderer children start with
@@ -622,7 +802,7 @@ function getObsBrowserSourceToken({ generateIfMissing = false } = {}) {
 }
 
 function buildObsBrowserSourceUrl() {
-  const token = getObsBrowserSourceToken({ generateIfMissing: isObsBrowserSourceEnabled() });
+  const token = getObsBrowserSourceToken({ generateIfMissing: isObsBrowserSourceEnabled() || isWindowsWallpaperChannelNeeded() });
   if (!token) {
     return null;
   }
@@ -3708,6 +3888,7 @@ app.on('window-all-closed', () => {
 
 app.on('before-quit', () => {
   clearPendingWindowPlaybackHandoffRequests();
+  destroyWindowsWallpaperWindow();
   voiceInputPauseMonitor.stop();
   displaySleepBlocker.stop();
   void discordPresence.destroy();
@@ -4187,6 +4368,13 @@ ipcMain.handle('window-set-always-on-top', (event, enabled) => {
 
 ipcMain.handle('obs-browser-source-get-status', () => {
   return buildObsBrowserSourceStatus();
+});
+
+ipcMain.handle('windows-wallpaper-get-status', () => {
+  return {
+    supported: windowsWallpaperModule.isWindowsWallpaperSupported(process.platform),
+    active: Boolean(windowsWallpaperWindow && !windowsWallpaperWindow.isDestroyed()),
+  };
 });
 
 ipcMain.handle('obs-browser-source-set-enabled', async (event, enabled) => {

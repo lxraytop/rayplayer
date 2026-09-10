@@ -113,6 +113,7 @@ const DesktopSettingsSubview: React.FC<DesktopSettingsSubviewProps> = ({
         onToggleWallpaperMode,
     } = preferences;
     const isLinux = isElectron && window.electron?.platform === 'linux';
+    const isWindows = isElectron && window.electron?.platform === 'win32';
     const {
         canDownloadUpdate,
         canEnableAutoUpdate,
@@ -248,7 +249,7 @@ const DesktopSettingsSubview: React.FC<DesktopSettingsSubviewProps> = ({
                 )}
             </section>
 
-            {isLinux && (
+            {(isLinux || isWindows) && (
                 <section className="space-y-4">
                     <h3 className="text-xs font-bold uppercase tracking-widest mb-3 flex items-center gap-2 opacity-60" style={{ color: 'var(--text-secondary)' }}>
                         <AppWindow size={14} className="opacity-70" /> {t('options.wallpaperMode') || 'Wallpaper Mode'}
@@ -264,7 +265,9 @@ const DesktopSettingsSubview: React.FC<DesktopSettingsSubviewProps> = ({
                                         {t('options.wallpaperMode')}
                                     </h4>
                                     <p className="text-xs opacity-50 leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
-                                        {t('options.wallpaperModeDesc') || 'Sink the app window to the bottom of the desktop and keep it always visible as a lyrics wallpaper.'}
+                                        {isWindows
+                                            ? t('options.wallpaperModeWindowsDesc')
+                                            : (t('options.wallpaperModeDesc') || 'Sink the app window to the bottom of the desktop and keep it always visible as a lyrics wallpaper.')}
                                     </p>
                                 </div>
                             </div>

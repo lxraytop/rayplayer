@@ -989,6 +989,7 @@ export default {
     "openPlayerOnLaunch": "Open player on launch",
     "wallpaperMode": "Wallpaper mode",
     "wallpaperModeDesc": "Sink the app window to the bottom of the desktop and keep it always visible as a lyrics wallpaper.",
+    "wallpaperModeWindowsDesc": "Render the lyrics animation as a Windows desktop wallpaper layer behind your icons, synced to playback in real time.",
     "voiceInputSettings": "Voice input",
     "voiceInputPause": "Pause playback during voice input",
     "voiceInputPauseDesc": "Automatically pause playback while system voice input (Win+H voice typing, IME speech-to-text) or another app uses the microphone, and resume afterwards. Windows desktop only.",

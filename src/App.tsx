@@ -1866,6 +1866,9 @@ export default function App() {
         refreshObsBrowserSourceStatus,
     } = useObsBrowserSourcePublisher({
         isElectronWindow,
+        // Windows wallpaper renders the same OBS browser source pipeline, so keep it publishing even
+        // when the OBS source toggle itself is off.
+        wallpaperModeActive: isElectronWindow && window.electron?.platform === 'win32' && wallpaperMode,
         activePlaybackContext,
         stageSource,
         currentSong,

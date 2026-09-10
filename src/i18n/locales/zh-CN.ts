@@ -989,6 +989,7 @@ export default {
     "openPlayerOnLaunch": "启动后直接进入播放页",
     "wallpaperMode": "壁纸模式",
     "wallpaperModeDesc": "将应用窗口沉到桌面最底层，作为歌词壁纸常驻显示。",
+    "wallpaperModeWindowsDesc": "将歌词动画渲染为桌面壁纸层，铺满桌面图标之下，并随播放实时同步。",
     "voiceInputSettings": "语音输入",
     "voiceInputPause": "语音输入时暂停播放",
     "voiceInputPauseDesc": "检测到系统语音输入（如 Win+H 语音键入、输入法语音转文字）或其他应用占用麦克风时自动暂停播放，结束后自动恢复。仅 Windows 桌面端生效。",
