@@ -124,6 +124,14 @@ const VISUALIZER_MODE_GLYPHS: Record<string, React.ReactNode> = {
             <path d="M4 12h16" opacity="0.7" />
         </>
     ),
+    // 涟漪：水面上落下的字与其下方扩散的水波
+    ripple: (
+        <>
+            <path d="M7 7.5h10" />
+            <path d="M5 2 12.5c2.2 1.7 4.4 1.7 6.6 0" opacity="0.6" transform="translate(0 10)" />
+            <path d="M3 4c3 2.1 6 2.1 9 0s6-2.1 9 0" opacity="0.35" transform="translate(0 10)" />
+        </>
+    ),
 };
 
 const BACKGROUND_MODE_GLYPHS: Record<string, React.ReactNode> = {
