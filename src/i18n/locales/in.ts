@@ -986,6 +986,7 @@ export default {
     "openPlayerOnLaunch": "Buka pemutar saat diluncurkan",
     "wallpaperMode": "Mode wallpaper",
     "wallpaperModeDesc": "Turunkan jendela aplikasi ke dasar desktop dan pertahankan selalu terlihat sebagai wallpaper lirik.",
+    "wallpaperModeWindowsDesc": "Render animasi lirik sebagai lapisan wallpaper desktop Windows di balik ikon, tersinkron dengan pemutaran secara real time.",
     "voiceInputSettings": "Input suara",
     "voiceInputPause": "Jeda pemutaran saat input suara",
     "voiceInputPauseDesc": "Secara otomatis menjeda pemutaran saat input suara sistem (ketik suara Win+H, teks-ke-ucapan IME) atau aplikasi lain menggunakan mikrofon, dan lanjutkan setelahnya. Hanya desktop Windows.",

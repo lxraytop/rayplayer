@@ -55,6 +55,9 @@ const OBS_CLOCK_JUMP_THRESHOLD_SEC = 0.35;
 const OBS_CLOCK_JUMP_MIN_INTERVAL_MS = 80;
 type UseObsBrowserSourcePublisherOptions = {
     isElectronWindow: boolean;
+    // Windows desktop wallpaper hosts this same browser source pipeline, so publishing must continue
+    // while the wallpaper layer is active even if the user has not enabled the OBS source itself.
+    wallpaperModeActive?: boolean;
     activePlaybackContext: PlaybackContext;
     stageSource: StageSource | null;
     currentSong: SongResult | null;
@@ -126,6 +129,7 @@ const resolveTemperaLayerAssets = async (
 
 export const useObsBrowserSourcePublisher = ({
     isElectronWindow,
+    wallpaperModeActive = false,
     activePlaybackContext,
     stageSource,
     currentSong,
@@ -171,7 +175,8 @@ export const useObsBrowserSourcePublisher = ({
         monetPortrait: MonetPortraitImage | null;
         temperaLayer: { id: string; name: string; url: string }[];
     }>({ cappellaEmoji: [], cappellaAvatar: [], monetBackground: null, monetPortrait: null, temperaLayer: [] });
-    const isExternallyRendering = status.enabled && status.clientCount > 0;
+    const isExternalRenderingChannelActive = status.enabled || wallpaperModeActive;
+    const isExternallyRendering = isExternalRenderingChannelActive && status.clientCount > 0;
     const lastPublishedClockRef = useRef<ObsBrowserSourceClock | null>(null);
     const lastClockPublishMsRef = useRef(0);
     const configPublicationTrackerRef = useRef(new ObsBrowserSourceConfigPublicationTracker());
@@ -371,7 +376,7 @@ export const useObsBrowserSourcePublisher = ({
                 tracker.markFailed(publication.signature);
                 console.warn('[OBS] Failed to publish browser source config', error);
             });
-    }, [config, status.enabled]);
+    }, [config, isExternalRenderingChannelActive]);
 
     useEffect(() => {
         if (!isExternallyRendering || !window.electron?.publishObsBrowserSourceClock) {

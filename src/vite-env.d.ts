@@ -472,6 +472,8 @@ declare global {
     electron?: {
       platform: string;
       isLinuxX11: boolean;
+      isWindows: boolean;
+      getWindowsWallpaperStatus: () => Promise<{ supported: boolean; active: boolean }>;
       getSettings: () => Promise<any>;
       saveSettings: (key: string, value: any) => Promise<any>;
       onWallpaperModeChanged?: (callback: (settings: Record<string, unknown>) => void) => () => void;

@@ -3,6 +3,8 @@ const { contextBridge, ipcRenderer } = require('electron');
 contextBridge.exposeInMainWorld('electron', {
     platform: process.platform,
     isLinuxX11: process.platform === 'linux' && !process.env.WAYLAND_DISPLAY,
+    isWindows: process.platform === 'win32',
+    getWindowsWallpaperStatus: () => ipcRenderer.invoke('windows-wallpaper-get-status'),
     getSettings: () => ipcRenderer.invoke('get-settings'),
     saveSettings: (key, value) => ipcRenderer.invoke('save-settings', key, value),
     onWallpaperModeChanged: (callback) => {
