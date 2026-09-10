@@ -1,0 +1,34 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="ray_gradient" x1="0" y1="0" x2="512" y2="512" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#8B5CF6"/>
+      <stop offset="1" stop-color="#6D28D9"/>
+    </linearGradient>
+    <filter id="dropShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="10"/>
+      <feOffset dx="4" dy="8" result="offsetblur"/>
+      <feComponentTransfer>
+        <feFuncA type="linear" slope="0.3"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background Container: Soft Rounded Square with Purple Gradient -->
+  <rect x="32" y="32" width="448" height="448" rx="120" fill="url(#ray_gradient)" />
+
+  <!-- Stylized R Logo -->
+  <g filter="url(#dropShadow)">
+    <!-- Vertical Stem -->
+    <path d="M168 120 C 168 102 183 96 198 96 H 232 C 247 96 264 112 264 128 V 300 C 264 316 247 328 232 328 H 198 C 183 328 168 316 168 300 V 120 Z" fill="white"/>
+
+    <!-- Bowl (Round Part) -->
+    <path d="M264 158 H 308 C 356 158 396 190 396 238 C 396 286 356 318 308 318 H 276 V 300 C 276 284 262 272 246 272 C 230 272 216 284 216 300 V 328 C 216 344 230 358 246 358 H 308 C 382 358 442 306 442 238 C 442 170 382 118 308 118 H 264 V 158 Z" fill="white"/>
+
+    <!-- Leg (Diagonal Stroke) -->
+    <path d="M318 248 C 346 248 368 268 368 294 C 368 320 346 340 318 340 H 292 C 278 340 266 330 266 316 V 292 C 266 268 292 248 318 248 Z" fill="white" transform="translate(-20, 18) skewX(-14)"/>
+  </g>
+</svg>
