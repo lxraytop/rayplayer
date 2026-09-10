@@ -72,6 +72,8 @@ exports[`command palette registry contract > keeps the registered command order 
   "settings-language-zh-CN",
   "settings-language-en",
   "settings-language-in",
+  "view-home-toggle-layout",
+  "view-playlist-toggle-layout",
   "navigate-home",
   "navigate-player",
   "browser-fullscreen",

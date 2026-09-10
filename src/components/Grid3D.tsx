@@ -23,6 +23,7 @@ import type { OnlineProviderPlatformState } from '../hooks/useOnlineProviderPlat
 import { omni } from '../services/onlineMusic/omni';
 import { getPersonalFmSelectionLabel } from '../services/onlineMusic/fmModes';
 import { usePersonalFmModeStore } from '../stores/usePersonalFmModeStore';
+import { useLibraryViewModeStore } from '../stores/useLibraryViewModeStore';
 import { getSongCoverUrl } from '../services/onlineMusic/songMetadata';
 import OnlineProviderSwitcher from './app/home/OnlineProviderSwitcher';
 import OnlineProviderConnectPanel from './app/home/OnlineProviderConnectPanel';
@@ -161,6 +162,10 @@ export const Grid3D: React.FC<Grid3DProps> = (props) => {
         showHomeTabAlbums: state.showHomeTabAlbums,
         showHomeTabLocal: state.showHomeTabLocal,
     })));
+    // Card / list layout for the home collection surfaces, shared by the online, local and
+    // Navidrome grids so the whole home view switches together.
+    const homeViewMode = useLibraryViewModeStore(state => state.homeViewMode);
+    const setHomeViewMode = useLibraryViewModeStore(state => state.setHomeViewMode);
     const {
         homeViewTab,
         setHomeViewTab,
@@ -859,6 +864,8 @@ export const Grid3D: React.FC<Grid3DProps> = (props) => {
                         isInteractive={isInteractive}
                         hasFloatingPlayer={Boolean(currentTrack)}
                         playlistVisibilityScope={`online:${activeProviderId}`}
+                        viewMode={homeViewMode}
+                        onViewModeChange={setHomeViewMode}
                     />
                 ) : homeViewTab === 'local' ? (
                     <div className="w-full h-full flex-1">

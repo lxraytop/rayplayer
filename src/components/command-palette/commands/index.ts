@@ -3,6 +3,7 @@ import type { CommandPaletteCommand } from '../types';
 import { searchCommands } from './searchCommands';
 import { playbackCommands } from './playbackCommands';
 import { settingsCommands } from './settingsCommands';
+import { libraryViewCommands } from './libraryViewCommands';
 import { navigationCommands } from './navigationCommands';
 import { panelCommands } from './panelCommands';
 import { visualizerCommands } from './visualizerCommands';
@@ -45,6 +46,7 @@ export const ALL_COMMAND_PALETTE_COMMANDS: CommandPaletteCommand[] = assertExecu
     ...searchCommands,
     ...playbackCommands,
     ...settingsCommands,
+    ...libraryViewCommands,
     ...navigationCommands,
     ...panelCommands,
     ...visualizerCommands,

@@ -42,6 +42,9 @@ import {
     resolveGridTrackArtistTargetId,
 } from './ray-grid/gridTrackNavigation';
 import { canResolveSongCatalogRef } from '../services/onlineMusic/catalogRefs';
+import { PlaylistTrackListView } from './library-list/PlaylistTrackListView';
+import { ViewModeToggleButton } from './library-list/ViewModeToggleButton';
+import { useLibraryViewModeStore } from '../stores/useLibraryViewModeStore';
 import type { MediaId, ProviderCollection } from '../types/onlineMusic';
 
 export interface GridViewSourceActions {
@@ -541,6 +544,11 @@ export const GridView: React.FC<GridViewProps> = ({
     isInteractive = true,
 }) => {
     const { t } = useTranslation();
+    // Card / list layout for the playlist detail. Only the track list can be listed, so the
+    // toggle is limited to `mode === 'tracks'`.
+    const playlistDetailViewMode = useLibraryViewModeStore(state => state.playlistDetailViewMode);
+    const setPlaylistDetailViewMode = useLibraryViewModeStore(state => state.setPlaylistDetailViewMode);
+    const isPlaylistListView = mode === 'tracks' && playlistDetailViewMode === 'list';
     const containerRef = useRef<HTMLDivElement>(null);
     const dragControls = useDragControls();
     const [focusedIndex, setFocusedIndex] = useState(0);
@@ -2105,20 +2113,32 @@ export const GridView: React.FC<GridViewProps> = ({
                 <ChevronLeft size={20} />
             </button>
 
-            {(progressiveLoading.backgroundLoading || backgroundLoadFailed) && (
-                <button
-                    type="button"
-                    onClick={() => {
-                        if (!backgroundLoadFailed || !collection) return;
-                        void fetchRemainingTracks(tracks, collection.tracksUpdatedAt || collection.updatedAt || 0);
-                    }}
-                    className="absolute right-6 top-5 z-[70] flex items-center gap-2 rounded-full px-3 py-2 text-xs backdrop-blur-md"
-                    style={{ backgroundColor: 'color-mix(in srgb, var(--bg-color) 65%, transparent)' }}
-                    title={t('playlist.loading')}
-                >
-                    <RefreshCw size={14} className={progressiveLoading.backgroundLoading ? 'animate-spin' : ''} />
-                    {backgroundLoadFailed ? t('ui.retry') : t('playlist.loading')}
-                </button>
+            {/* Top right controls: card / list layout switch plus the background loading indicator */}
+            {(mode === 'tracks' || progressiveLoading.backgroundLoading || backgroundLoadFailed) && (
+                <div className="absolute right-6 top-5 z-[70] flex items-center gap-2">
+                    {mode === 'tracks' && (
+                        <ViewModeToggleButton
+                            viewMode={playlistDetailViewMode}
+                            isDaylight={isDaylight}
+                            onToggle={() => setPlaylistDetailViewMode(isPlaylistListView ? 'card' : 'list')}
+                        />
+                    )}
+                    {(progressiveLoading.backgroundLoading || backgroundLoadFailed) && (
+                        <button
+                            type="button"
+                            onClick={() => {
+                                if (!backgroundLoadFailed || !collection) return;
+                                void fetchRemainingTracks(tracks, collection.tracksUpdatedAt || collection.updatedAt || 0);
+                            }}
+                            className="flex items-center gap-2 rounded-full px-3 py-2 text-xs backdrop-blur-md"
+                            style={{ backgroundColor: 'color-mix(in srgb, var(--bg-color) 65%, transparent)' }}
+                            title={t('playlist.loading')}
+                        >
+                            <RefreshCw size={14} className={progressiveLoading.backgroundLoading ? 'animate-spin' : ''} />
+                            {backgroundLoadFailed ? t('ui.retry') : t('playlist.loading')}
+                        </button>
+                    )}
+                </div>
             )}
 
             {/* Center Clickable Area */}
@@ -2153,6 +2173,8 @@ export const GridView: React.FC<GridViewProps> = ({
             <div
                 ref={containerRef}
                 onPointerDown={(event) => {
+                    // The list layout scrolls natively and has no draggable canvas to grab.
+                    if (isPlaylistListView) return;
                     if (event.button !== 0) return; // 仅限鼠标左键或主要指针拖动
 
                     const target = event.target as HTMLElement;
@@ -2181,6 +2203,31 @@ export const GridView: React.FC<GridViewProps> = ({
                 className="w-full flex-1 relative flex items-center justify-center cursor-grab active:cursor-grabbing overflow-hidden"
                 style={{ touchAction: 'none' }}
             >
+                {isPlaylistListView ? (
+                    <PlaylistTrackListView
+                        tracks={displayTracks}
+                        queueTracks={playableTracks}
+                        focusedIndex={focusedIndex}
+                        onFocusedIndexChange={setFocusedIndex}
+                        onSelectTrack={onSelectTrack}
+                        onAddToQueue={onAddTrackToQueue}
+                        isLoading={isLoading || externalTracksLoading}
+                        emptyMessage={t('home.loadingLibrary')}
+                        toolbar={supportsLocalTrackSorting ? (
+                            <>
+                                <LocalTrackSortDirectionButton
+                                    direction={localTrackSortDirection}
+                                    onDirectionChange={handleLocalTrackSortDirectionChange}
+                                />
+                                <LocalTrackSortMenu
+                                    field={localTrackSortField}
+                                    onFieldChange={handleLocalTrackSortFieldChange}
+                                />
+                            </>
+                        ) : undefined}
+                    />
+                ) : (
+                <>
                 <AnimatePresence>
                     {showSearchPanel && (
                         <motion.div
@@ -2578,6 +2625,8 @@ export const GridView: React.FC<GridViewProps> = ({
                         </motion.div>
                     )}
                 </AnimatePresence>
+                </>
+                )}
             </div>
             <PlaylistSelectionDialog
                 isOpen={isPlaylistPickerOpen}
@@ -2605,7 +2654,7 @@ export const GridView: React.FC<GridViewProps> = ({
             />
 
             {/* Bottom Right Floating Button */}
-            {mode === 'tracks' && displayTracks.length > 0 && (
+            {mode === 'tracks' && !isPlaylistListView && displayTracks.length > 0 && (
                 <GridListSearchButton
                     isDaylight={isDaylight}
                     accentColor={theme.accentColor}
@@ -2617,7 +2666,7 @@ export const GridView: React.FC<GridViewProps> = ({
             )}
 
             {/* Tracks Cut-in Side Panel */}
-            {mode === 'tracks' && (
+            {mode === 'tracks' && !isPlaylistListView && (
                 <SidePanelList
                     isOpen={showSidePanel}
                     onClose={() => setShowSidePanel(false)}

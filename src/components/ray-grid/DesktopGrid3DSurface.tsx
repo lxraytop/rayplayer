@@ -7,6 +7,9 @@ import { Grid3DSlider, Grid3DSliderItem } from './Grid3DSlider';
 import { ChevronDown } from 'lucide-react';
 import type { GridMapBatchConfig } from './gridMapBatch';
 import { isHideableGridItem } from './gridItemVisibility';
+import { Grid3DListView } from '../library-list/Grid3DListView';
+import { ViewModeToggleButton } from '../library-list/ViewModeToggleButton';
+import type { LibraryViewMode } from '../../stores/useLibraryViewModeStore';
 
 // src/components/ray-grid/DesktopGrid3DSurface.tsx
 // Shared desktop home surface that keeps Grid3D slider and GridMap controls visually consistent.
@@ -59,6 +62,10 @@ interface DesktopGrid3DSurfaceProps {
     hasFloatingPlayer?: boolean;
     playlistVisibilityScope?: string;
     batchConfig?: GridMapBatchConfig;
+    /** Current layout for this surface. When omitted the surface always renders the 3D card grid. */
+    viewMode?: LibraryViewMode;
+    /** Enables the card / list switch. Without it the surface stays card-only. */
+    onViewModeChange?: (mode: LibraryViewMode) => void;
 }
 
 export const DesktopGrid3DSurface: React.FC<DesktopGrid3DSurfaceProps> = ({
@@ -78,10 +85,16 @@ export const DesktopGrid3DSurface: React.FC<DesktopGrid3DSurfaceProps> = ({
     hasFloatingPlayer = false,
     playlistVisibilityScope = 'default',
     batchConfig,
+    viewMode = 'card',
+    onViewModeChange,
 }) => {
     const [showGridMap, setShowGridMap] = useState(false);
     const [tabsExpanded, setTabsExpanded] = useState(false);
     const [hiddenPlaylistsByScope, setHiddenPlaylistsByScope] = useState(readHiddenGridPlaylists);
+
+    // The list layout is opt-in: without a change handler the surface stays card-only, which keeps
+    // every existing call site unchanged.
+    const isListView = viewMode === 'list' && Boolean(onViewModeChange);
 
     const activeTab = tabs.find(tab => tab.active) || tabs[0];
     const hiddenPlaylistIds = useMemo(
@@ -132,7 +145,7 @@ export const DesktopGrid3DSurface: React.FC<DesktopGrid3DSurfaceProps> = ({
 
     return (
         <div className="w-full h-full min-h-0 flex flex-col justify-center relative">
-            {!isLoading && (
+            {!isLoading && !isListView && (
                 <div className="absolute top-2 left-1/2 -translate-x-1/2 z-10">
                     <motion.button
                         whileHover={{ scale: 1.05 }}
@@ -150,8 +163,15 @@ export const DesktopGrid3DSurface: React.FC<DesktopGrid3DSurfaceProps> = ({
                 </div>
             )}
 
-            {(actions.length > 0 || tabs.length > 0) && (
+            {(actions.length > 0 || tabs.length > 0 || Boolean(onViewModeChange)) && (
                 <div className="absolute top-2 right-4 z-10 flex max-w-[min(44rem,calc(50%-7rem))] flex-wrap items-center justify-end gap-2">
+                    {onViewModeChange && (
+                        <ViewModeToggleButton
+                            viewMode={viewMode}
+                            isDaylight={isDaylight}
+                            onToggle={() => onViewModeChange(viewMode === 'list' ? 'card' : 'list')}
+                        />
+                    )}
                     <AnimatePresence mode="wait">
                         {tabsExpanded ? (
                             <motion.div
@@ -239,20 +259,32 @@ export const DesktopGrid3DSurface: React.FC<DesktopGrid3DSurfaceProps> = ({
                 </div>
             )}
 
-            <Grid3DSlider
-                items={visibleItems}
-                focusedIndex={visibleFocusedIndex}
-                onFocusedIndexChange={handleVisibleFocusedIndexChange}
-                onSelect={handleVisibleSelect}
-                isInteractive={isInteractive && !showGridMap}
-                isLoading={isLoading}
-                emptyMessage={emptyMessage}
-                isDaylight={isDaylight}
-                hasFloatingPlayer={hasFloatingPlayer}
-            />
+            {isListView ? (
+                <Grid3DListView
+                    items={visibleItems}
+                    focusedIndex={visibleFocusedIndex}
+                    onFocusedIndexChange={handleVisibleFocusedIndexChange}
+                    onSelect={handleVisibleSelect}
+                    isLoading={isLoading}
+                    emptyMessage={emptyMessage}
+                    ariaLabel={title}
+                />
+            ) : (
+                <Grid3DSlider
+                    items={visibleItems}
+                    focusedIndex={visibleFocusedIndex}
+                    onFocusedIndexChange={handleVisibleFocusedIndexChange}
+                    onSelect={handleVisibleSelect}
+                    isInteractive={isInteractive && !showGridMap}
+                    isLoading={isLoading}
+                    emptyMessage={emptyMessage}
+                    isDaylight={isDaylight}
+                    hasFloatingPlayer={hasFloatingPlayer}
+                />
+            )}
 
             <AnimatePresence>
-                {showGridMap && (
+                {showGridMap && !isListView && (
                     <GridMap
                         title={title}
                         items={items.map(item => ({

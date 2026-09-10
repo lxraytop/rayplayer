@@ -12,6 +12,7 @@ import {
 } from './gridViewCollectionAdapters';
 import { useDebouncedFocusSync } from '../../../hooks/useDebouncedFocusSync';
 import { useNavidromeGridLibrary } from './useNavidromeGridLibrary';
+import { useLibraryViewModeStore } from '../../../stores/useLibraryViewModeStore';
 
 // src/components/app/home/NavidromeGrid3DView.tsx
 // Desktop-only Navidrome Grid3D overview that opens GridView instead of legacy collection views.
@@ -47,6 +48,9 @@ export const NavidromeGrid3DView: React.FC<NavidromeGrid3DViewProps> = ({
     isInteractive = true,
 }) => {
     const { t } = useTranslation();
+    // Shared home card / list layout, driven by the same store state as the online home grid.
+    const homeViewMode = useLibraryViewModeStore(state => state.homeViewMode);
+    const setHomeViewMode = useLibraryViewModeStore(state => state.setHomeViewMode);
     const [localAlbumIndex, setLocalAlbumIndex] = useDebouncedFocusSync(focusedAlbumIndex, setFocusedAlbumIndex);
     const [section, setSection] = useState<NaviSection>(() => {
         try {
@@ -316,6 +320,8 @@ export const NavidromeGrid3DView: React.FC<NavidromeGrid3DViewProps> = ({
             isInteractive={isInteractive}
             hasFloatingPlayer={hasFloatingPlayer}
             playlistVisibilityScope="navidrome"
+            viewMode={homeViewMode}
+            onViewModeChange={setHomeViewMode}
         />
     );
 };
