@@ -362,23 +362,23 @@ async function createWindowsWallpaperWindow() {
     console.error('[Wallpaper] Failed to prepare the OBS browser source channel', error);
   }
 
-  const sourceUrl = buildObsBrowserSourceUrl({ wallpaper: true });
+  const sourceUrl = buildObsBrowserSourceUrl();
   if (!sourceUrl) {
     console.warn('[Wallpaper] OBS browser source channel unavailable; skipping wallpaper window');
     return null;
   }
 
   const { x, y, width, height } = screen.getPrimaryDisplay().bounds;
-  // The layer must be opaque: Electron only sets WS_EX_NOREDIRECTIONBITMAP for transparent windows,
-  // and a window without a redirection bitmap renders nothing once it is a child of the desktop host.
-  // The source page compensates by painting an opaque visualizer background in wallpaper mode.
+  // Transparent, matching the Linux desktop-window behaviour: the lyrics float above the real desktop
+  // wallpaper instead of replacing it. Compositing into the desktop host does not need an opaque
+  // window — WS_EX_NOREDIRECTIONBITMAP is present either way and the window still renders as a child.
   const win = new BrowserWindow({
     x,
     y,
     width,
     height,
     frame: false,
-    transparent: false,
+    transparent: true,
     resizable: false,
     movable: false,
     minimizable: false,
@@ -389,7 +389,7 @@ async function createWindowsWallpaperWindow() {
     hasShadow: false,
     show: false,
     enableLargerThanScreen: true,
-    backgroundColor: '#000000',
+    backgroundColor: '#00000000',
     webPreferences: {
       preload: path.join(__dirname, 'preload.cjs'),
       nodeIntegration: false,
@@ -854,17 +854,13 @@ function getObsBrowserSourceToken({ generateIfMissing = false } = {}) {
   return nextToken;
 }
 
-function buildObsBrowserSourceUrl({ wallpaper = false } = {}) {
+function buildObsBrowserSourceUrl() {
   const token = getObsBrowserSourceToken({ generateIfMissing: isObsBrowserSourceChannelActive() });
   if (!token) {
     return null;
   }
 
-  // `wallpaper=1` tells the source page it is painted onto the desktop rather than composited into an
-  // OBS scene. A transparent page has nothing to composite against there, so the page switches to an
-  // opaque visualizer background instead.
-  const wallpaperParam = wallpaper ? '&wallpaper=1' : '';
-  return `http://127.0.0.1:${getConfiguredObsBrowserSourcePort()}/obs?obs=1&token=${encodeURIComponent(token)}${wallpaperParam}`;
+  return `http://127.0.0.1:${getConfiguredObsBrowserSourcePort()}/obs?obs=1&token=${encodeURIComponent(token)}`;
 }
 
 function buildObsBrowserSourceStatus() {
@@ -3153,11 +3149,6 @@ async function handleObsBrowserSourceHttpRequest(req, res) {
       devUrl.searchParams.set('obs', '1');
       devUrl.searchParams.set('token', requestUrl.searchParams.get('token') || '');
       devUrl.searchParams.set('obsPort', String(getConfiguredObsBrowserSourcePort()));
-      // The wallpaper flag has to survive the dev redirect, otherwise the desktop layer would come up
-      // transparent in development but opaque in a packaged build.
-      if (requestUrl.searchParams.get('wallpaper') === '1') {
-        devUrl.searchParams.set('wallpaper', '1');
-      }
       res.writeHead(302, { Location: devUrl.toString() });
       res.end();
       return;

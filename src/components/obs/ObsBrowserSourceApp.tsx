@@ -12,12 +12,6 @@ import { buildObsBrowserSourceConfigSignature, resolveObsBrowserSourceClockTime 
 
 const EMPTY_SPECTRUM = new Uint8Array(0);
 
-// The Windows desktop layer loads this same page, but as an opaque child window of the desktop host
-// rather than as an OBS overlay. A transparent page has nothing to composite against there, so the
-// `wallpaper=1` flag makes the page paint a real background instead of staying see-through.
-const IS_WALLPAPER_LAYER = typeof window !== 'undefined'
-    && new URLSearchParams(window.location.search).get('wallpaper') === '1';
-
 const buildEventSourceUrl = () => {
     const params = new URLSearchParams(window.location.search);
     const token = params.get('token') ?? '';
@@ -58,11 +52,8 @@ const ObsBrowserSourceApp: React.FC = () => {
     }), [bass, lowMid, mid, spectrum, treble, vocal]);
 
     useEffect(() => {
-        // Anything left transparent here would show the wallpaper window's own colour, so the desktop
-        // layer starts from an opaque base and lets the rendered root element paint the real colour.
-        const baseBackground = IS_WALLPAPER_LAYER ? '#000000' : 'transparent';
-        document.body.style.backgroundColor = baseBackground;
-        document.documentElement.style.backgroundColor = baseBackground;
+        document.body.style.backgroundColor = 'transparent';
+        document.documentElement.style.backgroundColor = 'transparent';
         document.body.style.overflow = 'hidden';
         document.title = 'Ray OBS';
     }, []);
@@ -189,9 +180,7 @@ const ObsBrowserSourceApp: React.FC = () => {
                 width: obsDimensions.width,
                 height: obsDimensions.height,
                 zoom: obsScale,
-                backgroundColor: IS_WALLPAPER_LAYER
-                    ? config.theme.backgroundColor
-                    : (config.background?.transparent ? 'transparent' : config.theme.backgroundColor),
+                backgroundColor: config.background?.transparent ? 'transparent' : config.theme.backgroundColor,
                 color: config.theme.primaryColor,
             }}
         >
