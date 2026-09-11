@@ -5,7 +5,8 @@
 // only owns the Windows-specific pieces that have no Linux/macOS equivalent:
 //   - the platform gate (Windows is the only platform that may use this path),
 //   - reading the native window handle Electron returns,
-//   - building the PowerShell that reparents the wallpaper window behind the desktop icons.
+//   - building the PowerShell that reparents the wallpaper window behind the desktop icons,
+//   - encoding that script for `-EncodedCommand` so no shell quoting can corrupt it.
 //
 // Everything here is a pure function so it can be unit-tested without launching Electron.
 
@@ -33,7 +34,14 @@ function readHwndFromHandleBuffer(handle) {
 // Wallpaper Engine-style desktop layering: the Shell hosts the icons inside SHELLDLL_DefView, and the
 // WorkerW sibling of that view is the surface that sits *behind* the icons. Reparenting our window to
 // that WorkerW makes it a real desktop background instead of a normal always-on-bottom window.
+//
+// Windows 11 (24H2 and later) keeps SHELLDLL_DefView directly under Progman with no WorkerW sibling,
+// so Progman is used as the fallback host: the icons still live in the child view drawn on top, which
+// keeps the wallpaper behind them.
+//
 // Add-Type compiles a tiny P/Invoke shim; the caller runs this best-effort and degrades gracefully.
+// The local variable is named $wallpaperHost rather than $host because $host is a PowerShell
+// automatic variable and shadowing it is both fragile and misleading.
 function buildSinkToDesktopPowerShellCommand(hwndDecimal) {
   const target = String(hwndDecimal ?? '').replace(/[^0-9]/g, '');
   if (!target) {
@@ -42,7 +50,7 @@ function buildSinkToDesktopPowerShellCommand(hwndDecimal) {
 
   return [
     "$ErrorActionPreference='Stop'",
-    "$src=@'",
+    '$src=@\'',
     'using System;',
     'using System.Runtime.InteropServices;',
     'public static class RayWallpaperNative {',
@@ -59,21 +67,31 @@ function buildSinkToDesktopPowerShellCommand(hwndDecimal) {
     '      worker = FindWindowEx(IntPtr.Zero, worker, "WorkerW", null);',
     '      if (worker == IntPtr.Zero) { break; }',
     '      if (FindWindowEx(worker, IntPtr.Zero, "SHELLDLL_DefView", null) != IntPtr.Zero) {',
-    '        IntPtr host = FindWindowEx(IntPtr.Zero, worker, "WorkerW", null);',
-    '        if (host != IntPtr.Zero) { return host; }',
+    '        IntPtr sibling = FindWindowEx(IntPtr.Zero, worker, "WorkerW", null);',
+    '        if (sibling != IntPtr.Zero) { return sibling; }',
     '      }',
     '    }',
-    '    return IntPtr.Zero;',
+    '    return progman;',
     '  }',
     '}',
     "'@",
     'Add-Type -TypeDefinition $src',
-    `$target=[IntPtr]([int64]${target})`,
-    '$host=[RayWallpaperNative]::FindWallpaperHost()',
-    'if ($host -eq [IntPtr]::Zero) { exit 2 }',
-    'if (-not [RayWallpaperNative]::SetParent($target, $host)) { exit 3 }',
+    `$targetHwnd=[IntPtr]([int64]${target})`,
+    '$wallpaperHost=[RayWallpaperNative]::FindWallpaperHost()',
+    "if ($wallpaperHost -eq [IntPtr]::Zero) { [Console]::Error.WriteLine('ray-wallpaper: desktop host window not found'); exit 2 }",
+    "if (-not [RayWallpaperNative]::SetParent($targetHwnd, $wallpaperHost)) { [Console]::Error.WriteLine('ray-wallpaper: SetParent failed'); exit 3 }",
     'exit 0',
   ].join('\n');
+}
+
+// `-Command <script>` depends on how CreateProcess quoting is applied to the embedded double quotes
+// and newlines, which silently corrupts multi-line scripts. `-EncodedCommand` takes base64 of the
+// UTF-16LE script instead, so the script reaches PowerShell byte-for-byte with no shell parsing.
+function encodePowerShellCommand(script) {
+  if (typeof script !== 'string' || !script) {
+    return null;
+  }
+  return Buffer.from(script, 'utf16le').toString('base64');
 }
 
 module.exports = {
@@ -81,4 +99,5 @@ module.exports = {
   isWindowsWallpaperSupported,
   readHwndFromHandleBuffer,
   buildSinkToDesktopPowerShellCommand,
+  encodePowerShellCommand,
 };

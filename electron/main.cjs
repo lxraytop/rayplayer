@@ -297,20 +297,35 @@ function sinkWindowsWallpaperWindow(win) {
   }
 
   const script = windowsWallpaperModule.buildSinkToDesktopPowerShellCommand(hwnd);
-  if (!script) {
+  const encodedCommand = windowsWallpaperModule.encodePowerShellCommand(script);
+  if (!encodedCommand) {
     return;
   }
 
-  const child = spawn('powershell.exe', ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-Command', script], { windowsHide: true });
+  // The script is passed base64-encoded instead of inline: `-Command` re-parses the argument through
+  // CreateProcess quoting, which mangles the newlines and double quotes a multi-line script needs.
+  const child = spawn(
+    'powershell.exe',
+    ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-EncodedCommand', encodedCommand],
+    { windowsHide: true },
+  );
+
+  let stderr = '';
+  child.stderr?.on('data', (chunk) => {
+    stderr += String(chunk);
+  });
+
   child.once('error', (error) => {
     console.warn('[Wallpaper] Desktop sink helper failed to start; keeping always-on-bottom layer', error);
   });
   child.once('exit', (code) => {
     if (code === 0) {
       console.log('[Wallpaper] Window sunk behind desktop icons');
-    } else {
-      console.warn(`[Wallpaper] Desktop sink helper exited with code ${code}; keeping always-on-bottom layer`);
+      return;
     }
+    // Surface the helper's own message: without it a failure here is indistinguishable from a
+    // missing interpreter, and the desktop layer silently degrades to a floating window.
+    console.warn(`[Wallpaper] Desktop sink helper exited with code ${code}${stderr.trim() ? `: ${stderr.trim()}` : ''}`);
   });
 }
 
@@ -376,9 +391,24 @@ async function createWindowsWallpaperWindow() {
   });
 
   // Non-interactive wallpaper: it must never steal focus or swallow desktop clicks.
-  win.setAlwaysOnBottom(true);
-  win.setIgnoreMouseEvents(true);
-  win.setSkipTaskbar(true);
+  // `setAlwaysOnBottom` is macOS-only and is simply absent on Windows, where the desktop layer is
+  // instead achieved by reparenting the window to the shell's WorkerW host (windowsWallpaper.cjs).
+  // Guarding the call keeps a missing method from aborting creation and leaking an untracked window.
+  try {
+    if (typeof win.setAlwaysOnBottom === 'function') {
+      win.setAlwaysOnBottom(true);
+    } else {
+      win.setAlwaysOnTop(false);
+    }
+    win.setIgnoreMouseEvents(true);
+    win.setSkipTaskbar(true);
+  } catch (error) {
+    console.error('[Wallpaper] Failed to configure the wallpaper layer', error);
+    if (!win.isDestroyed()) {
+      win.destroy();
+    }
+    return null;
+  }
 
   win.once('ready-to-show', () => {
     applyWindowsWallpaperBounds(win);
@@ -434,8 +464,15 @@ async function syncWindowsWallpaperWindow() {
     return false;
   }
 
-  const win = await createWindowsWallpaperWindow();
-  return Boolean(win);
+  try {
+    const win = await createWindowsWallpaperWindow();
+    return Boolean(win);
+  } catch (error) {
+    // Every caller fires this without awaiting, so swallowing here is what keeps a creation failure
+    // from surfacing as an unhandled rejection and taking the main process down.
+    console.error('[Wallpaper] Failed to reconcile the Windows wallpaper layer', error);
+    return false;
+  }
 }
 
 // Startup wrapper: only the main process reaches main.cjs (GPU/renderer children start with
@@ -786,6 +823,13 @@ function isObsBrowserSourceEnabled() {
   return Boolean(store.get(OBS_BROWSER_SOURCE_ENABLED_SETTING_KEY));
 }
 
+// The Windows desktop wallpaper window consumes the same OBS browser source channel, so the channel
+// has to stay served whenever either consumer needs it — even when the user never enabled the OBS
+// browser source themselves. Every server-side gate must go through this instead of the raw setting.
+function isObsBrowserSourceChannelActive() {
+  return isObsBrowserSourceEnabled() || isWindowsWallpaperChannelNeeded();
+}
+
 function getObsBrowserSourceToken({ generateIfMissing = false } = {}) {
   const existing = store.get(OBS_BROWSER_SOURCE_TOKEN_SETTING_KEY);
   if (typeof existing === 'string' && existing.trim()) {
@@ -802,7 +846,7 @@ function getObsBrowserSourceToken({ generateIfMissing = false } = {}) {
 }
 
 function buildObsBrowserSourceUrl() {
-  const token = getObsBrowserSourceToken({ generateIfMissing: isObsBrowserSourceEnabled() || isWindowsWallpaperChannelNeeded() });
+  const token = getObsBrowserSourceToken({ generateIfMissing: isObsBrowserSourceChannelActive() });
   if (!token) {
     return null;
   }
@@ -3055,7 +3099,7 @@ async function handleObsBrowserSourceHttpRequest(req, res) {
     return;
   }
 
-  if (!isObsBrowserSourceEnabled()) {
+  if (!isObsBrowserSourceChannelActive()) {
     sendObsJson(res, 503, { error: 'OBS browser source is disabled.' });
     return;
   }
@@ -3106,7 +3150,7 @@ async function handleObsBrowserSourceHttpRequest(req, res) {
 }
 
 async function startObsBrowserSourceServerIfNeeded() {
-  if (!isObsBrowserSourceEnabled()) {
+  if (!isObsBrowserSourceChannelActive()) {
     return;
   }
 
@@ -3154,7 +3198,9 @@ async function stopObsBrowserSourceServer() {
 }
 
 async function syncObsBrowserSourceServerState() {
-  if (isObsBrowserSourceEnabled()) {
+  // Toggling the OBS setting must not tear the channel down while the wallpaper window still needs
+  // it, otherwise the desktop layer would silently lose its event stream.
+  if (isObsBrowserSourceChannelActive()) {
     await startObsBrowserSourceServerIfNeeded();
   } else {
     await stopObsBrowserSourceServer();
@@ -3867,6 +3913,10 @@ app.whenReady().then(async () => {
   ensureTray();
   createWindow();
   focusMainWindow();
+  // Restore the Windows desktop wallpaper layer when the mode was left enabled in a previous run.
+  if (windowsWallpaperModule.isWindowsWallpaperSupported(process.platform)) {
+    void syncWindowsWallpaperWindow();
+  }
   scheduleStartupUpdateCheck();
   voiceInputPauseMonitor.syncState();
 
@@ -3959,9 +4009,16 @@ ipcMain.handle('save-settings', (event, key, value) => {
   store.set(key, nextValue);
 
   if (key === WALLPAPER_MODE_SETTING_KEY) {
-    // Let the renderer receive its save-settings response before the process relaunches, while
-    // coalescing rapid toggles into one handoff/relaunch operation.
-    scheduleWallpaperModeRelaunch(Boolean(nextValue));
+    if (windowsWallpaperModule.isWindowsWallpaperSupported(process.platform)) {
+      // Windows has no window-type / windowtolayer path: the desktop layer is a dedicated
+      // always-on-bottom window that can be created or destroyed in place, so the toggle must never
+      // reach the relaunch path (a relaunch there would only restart the app and change nothing).
+      void syncWindowsWallpaperWindow();
+    } else {
+      // Let the renderer receive its save-settings response before the process relaunches, while
+      // coalescing rapid toggles into one handoff/relaunch operation.
+      scheduleWallpaperModeRelaunch(Boolean(nextValue));
+    }
   }
 
   if (key === 'enable_player_page_native_blur') {
