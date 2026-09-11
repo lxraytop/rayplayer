@@ -296,7 +296,8 @@ function sinkWindowsWallpaperWindow(win) {
     return;
   }
 
-  const script = windowsWallpaperModule.buildSinkToDesktopPowerShellCommand(hwnd);
+  const { width, height } = screen.getPrimaryDisplay().bounds;
+  const script = windowsWallpaperModule.buildSinkToDesktopPowerShellCommand(hwnd, { width, height });
   const encodedCommand = windowsWallpaperModule.encodePowerShellCommand(script);
   if (!encodedCommand) {
     return;
@@ -319,13 +320,18 @@ function sinkWindowsWallpaperWindow(win) {
     console.warn('[Wallpaper] Desktop sink helper failed to start; keeping always-on-bottom layer', error);
   });
   child.once('exit', (code) => {
+    // The helper reports the host it picked and the layer's state before/after, which is the only
+    // window-tree evidence available when the layer is reparented but still not visible.
+    for (const line of stderr.split('\n').map((entry) => entry.trim()).filter(Boolean)) {
+      console.log(`[Wallpaper] ${line}`);
+    }
     if (code === 0) {
       console.log('[Wallpaper] Window sunk behind desktop icons');
       return;
     }
-    // Surface the helper's own message: without it a failure here is indistinguishable from a
-    // missing interpreter, and the desktop layer silently degrades to a floating window.
-    console.warn(`[Wallpaper] Desktop sink helper exited with code ${code}${stderr.trim() ? `: ${stderr.trim()}` : ''}`);
+    // Surface a failure explicitly: without this a sink error is indistinguishable from a missing
+    // interpreter, and the desktop layer silently degrades to a floating window.
+    console.warn(`[Wallpaper] Desktop sink helper exited with code ${code}`);
   });
 }
 
@@ -356,20 +362,23 @@ async function createWindowsWallpaperWindow() {
     console.error('[Wallpaper] Failed to prepare the OBS browser source channel', error);
   }
 
-  const sourceUrl = buildObsBrowserSourceUrl();
+  const sourceUrl = buildObsBrowserSourceUrl({ wallpaper: true });
   if (!sourceUrl) {
     console.warn('[Wallpaper] OBS browser source channel unavailable; skipping wallpaper window');
     return null;
   }
 
   const { x, y, width, height } = screen.getPrimaryDisplay().bounds;
+  // The layer must be opaque: Electron only sets WS_EX_NOREDIRECTIONBITMAP for transparent windows,
+  // and a window without a redirection bitmap renders nothing once it is a child of the desktop host.
+  // The source page compensates by painting an opaque visualizer background in wallpaper mode.
   const win = new BrowserWindow({
     x,
     y,
     width,
     height,
     frame: false,
-    transparent: true,
+    transparent: false,
     resizable: false,
     movable: false,
     minimizable: false,
@@ -380,7 +389,7 @@ async function createWindowsWallpaperWindow() {
     hasShadow: false,
     show: false,
     enableLargerThanScreen: true,
-    backgroundColor: '#00000000',
+    backgroundColor: '#000000',
     webPreferences: {
       preload: path.join(__dirname, 'preload.cjs'),
       nodeIntegration: false,
@@ -845,13 +854,17 @@ function getObsBrowserSourceToken({ generateIfMissing = false } = {}) {
   return nextToken;
 }
 
-function buildObsBrowserSourceUrl() {
+function buildObsBrowserSourceUrl({ wallpaper = false } = {}) {
   const token = getObsBrowserSourceToken({ generateIfMissing: isObsBrowserSourceChannelActive() });
   if (!token) {
     return null;
   }
 
-  return `http://127.0.0.1:${getConfiguredObsBrowserSourcePort()}/obs?obs=1&token=${encodeURIComponent(token)}`;
+  // `wallpaper=1` tells the source page it is painted onto the desktop rather than composited into an
+  // OBS scene. A transparent page has nothing to composite against there, so the page switches to an
+  // opaque visualizer background instead.
+  const wallpaperParam = wallpaper ? '&wallpaper=1' : '';
+  return `http://127.0.0.1:${getConfiguredObsBrowserSourcePort()}/obs?obs=1&token=${encodeURIComponent(token)}${wallpaperParam}`;
 }
 
 function buildObsBrowserSourceStatus() {
@@ -3140,6 +3153,11 @@ async function handleObsBrowserSourceHttpRequest(req, res) {
       devUrl.searchParams.set('obs', '1');
       devUrl.searchParams.set('token', requestUrl.searchParams.get('token') || '');
       devUrl.searchParams.set('obsPort', String(getConfiguredObsBrowserSourcePort()));
+      // The wallpaper flag has to survive the dev redirect, otherwise the desktop layer would come up
+      // transparent in development but opaque in a packaged build.
+      if (requestUrl.searchParams.get('wallpaper') === '1') {
+        devUrl.searchParams.set('wallpaper', '1');
+      }
       res.writeHead(302, { Location: devUrl.toString() });
       res.end();
       return;

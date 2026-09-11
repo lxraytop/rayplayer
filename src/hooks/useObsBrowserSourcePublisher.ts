@@ -360,7 +360,10 @@ export const useObsBrowserSourcePublisher = ({
     useEffect(() => {
         const tracker = configPublicationTrackerRef.current;
         const publishConfig = window.electron?.publishObsBrowserSourceConfig;
-        if (!status.enabled || !publishConfig) {
+        // Must follow the shared channel flag, not the OBS toggle: the Windows wallpaper layer consumes
+        // the same channel with the OBS source switched off, and gating on the toggle here left it
+        // stuck on the "waiting for playback" placeholder forever.
+        if (!isExternalRenderingChannelActive || !publishConfig) {
             tracker.reset();
             return;
         }
