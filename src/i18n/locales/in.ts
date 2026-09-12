@@ -1646,6 +1646,25 @@ export default {
         "title": "Overlay dan Ekspor Desktop yang Lebih Mulus",
         "description": "Preset tray mengaktifkan mode terkunci, transparan, dan selalu di atas sekaligus; ekspor video juga lebih andal pada layar DPI tinggi, banyak monitor, dan pemotongan resolusi."
       }
+    },
+    "v1_6_0": {
+      "intro": "Berikut fitur baru dan peningkatan di versi 1.6.0.",
+      "windowsDesktopWallpaper": {
+        "title": "Mode Wallpaper Desktop Windows",
+        "description": "Lirik kini dapat berada di belakang ikon desktop dan diperbarui langsung mengikuti pemutaran, lalu desktop dipulihkan otomatis saat keluar."
+      },
+      "rippleLyricVisualizer": {
+        "title": "Visualisasi Lirik Ripple",
+        "description": "Mode Ripple baru menjatuhkan setiap kata ke air saat vokalnya berbunyi, memancarkan riak konsentris di atas pantulan yang terdistorsi, dilapisi cipratan, cekungan, kaustik, dan bloom."
+      },
+      "rippleStyleSettings": {
+        "title": "Pengaturan Gaya Ripple",
+        "description": "Atur skala font, kecepatan animasi, tinggi jatuh, kekuatan riak / cipratan / ambien, distorsi air, kekuatan pantulan, respons audio, dan setiap sakelar lapisan dari panel pengaturan."
+      },
+      "libraryViewSwitch": {
+        "title": "Tampilan Kartu dan Daftar untuk Beranda dan Playlist",
+        "description": "Beranda dan playlist kini dapat beralih antara tampilan kartu dan daftar; daftar menyesuaikan tinggi jendela, dan sampul tidak lagi tersendat saat beralih."
+      }
     }
   },
   "export": {

@@ -1706,6 +1706,25 @@ export default {
         "title": "更顺手的桌面叠加与导出",
         "description": "托盘新增“锁定 + 透明 + 置顶”一键预设；视频导出改善高 DPI、多显示器和分辨率裁剪，减少黑边与窗口跳动。"
       }
+    },
+    "v1_6_0": {
+      "intro": "以下是 1.6.0 的新功能与改进",
+      "windowsDesktopWallpaper": {
+        "title": "Windows 桌面壁纸模式",
+        "description": "歌词可以直接铺在 Windows 桌面图标之下，跟随播放实时更新，退出时自动还原桌面。"
+      },
+      "rippleLyricVisualizer": {
+        "title": "涟漪歌词可视化",
+        "description": "新增「涟漪」模式：每个词随人声落水激起同心涟漪，水面带扭曲倒影，并叠加水花、凹坑、焦散与光晕等多层水景。"
+      },
+      "rippleStyleSettings": {
+        "title": "涟漪样式设置",
+        "description": "字号、动画速度、落水高度、涟漪 / 水花 / 环境强度、水波扭曲、倒影强度、音频响应以及各图层开关都可在设置面板里调节。"
+      },
+      "libraryViewSwitch": {
+        "title": "首页与歌单视图切换",
+        "description": "首页和歌单支持卡片 / 列表两种视图，列表按窗口自适应高度，并修复封面在切换时偶发加载不出来的问题。"
+      }
     }
   },
   "export": {

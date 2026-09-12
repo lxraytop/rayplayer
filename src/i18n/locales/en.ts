@@ -1706,6 +1706,25 @@ export default {
         "title": "Smoother Desktop Overlays and Exports",
         "description": "A tray preset enables locked, transparent, always-on-top mode in one step, while video export handles high-DPI displays, multiple monitors, and resolution cropping more reliably."
       }
+    },
+    "v1_6_0": {
+      "intro": "Here are the new features and improvements in version 1.6.0.",
+      "windowsDesktopWallpaper": {
+        "title": "Windows Desktop Wallpaper Mode",
+        "description": "Lyrics can now sit behind your desktop icons and update live with playback, restoring the desktop automatically when you exit."
+      },
+      "rippleLyricVisualizer": {
+        "title": "Ripple Lyric Visualizer",
+        "description": "A new Ripple mode drops each word into the water as its vocal lands, sending out concentric ripples over a distorted reflection and layering in splash, a settling well, caustics, and bloom."
+      },
+      "rippleStyleSettings": {
+        "title": "Ripple Style Settings",
+        "description": "Tune font scale, animation speed, drop height, ripple / splash / ambient strength, water distortion, reflection strength, audio reactivity, and every layer switch from the settings panel."
+      },
+      "libraryViewSwitch": {
+        "title": "Card and List Views for Home and Playlists",
+        "description": "Home and playlists can now switch between card and list views; the list adapts to the window height, and covers no longer stall when switching."
+      }
     }
   },
   "export": {
