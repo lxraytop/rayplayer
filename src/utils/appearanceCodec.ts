@@ -6,6 +6,7 @@ import {
     DEFAULT_MONET_TUNING,
     DEFAULT_NOMAND_BACKGROUND_TUNING,
     DEFAULT_PENDOLO_TUNING,
+    DEFAULT_RIPPLE_TUNING,
     DEFAULT_SONNET_TUNING,
     DEFAULT_TEMPERA_TUNING,
     type DualTheme,
@@ -377,6 +378,38 @@ const compressSonnet = (t: any): any => ({
     ppld: t.postProcessLensDistortion,
     pplx: t.postProcessLensDispersion,
 });
+const compressRipple = (t: any): any => ({
+    fs: t.fontScale,
+    asp: t.animationSpeed,
+    rs: t.rippleStrength,
+    sss: t.splashStrength,
+    ams: t.ambientStrength,
+    wd: t.waterDistortion,
+    rfs: t.reflectionStrength,
+    arx: t.audioReactivity,
+    dh: t.dropHeight,
+    sws: t.showWaterSurface,
+    srf: t.showReflection,
+    sim: t.showImpact,
+    ssp: t.showSplash,
+    sam: t.showAmbient,
+});
+const decompressRipple = (o: any): any => ({
+    fontScale: o.fs !== undefined ? o.fs : DEFAULT_RIPPLE_TUNING.fontScale,
+    animationSpeed: o.asp !== undefined ? o.asp : DEFAULT_RIPPLE_TUNING.animationSpeed,
+    rippleStrength: o.rs !== undefined ? o.rs : DEFAULT_RIPPLE_TUNING.rippleStrength,
+    splashStrength: o.sss !== undefined ? o.sss : DEFAULT_RIPPLE_TUNING.splashStrength,
+    ambientStrength: o.ams !== undefined ? o.ams : DEFAULT_RIPPLE_TUNING.ambientStrength,
+    waterDistortion: o.wd !== undefined ? o.wd : DEFAULT_RIPPLE_TUNING.waterDistortion,
+    reflectionStrength: o.rfs !== undefined ? o.rfs : DEFAULT_RIPPLE_TUNING.reflectionStrength,
+    audioReactivity: o.arx !== undefined ? o.arx : DEFAULT_RIPPLE_TUNING.audioReactivity,
+    dropHeight: o.dh !== undefined ? o.dh : DEFAULT_RIPPLE_TUNING.dropHeight,
+    showWaterSurface: o.sws !== undefined ? o.sws : DEFAULT_RIPPLE_TUNING.showWaterSurface,
+    showReflection: o.srf !== undefined ? o.srf : DEFAULT_RIPPLE_TUNING.showReflection,
+    showImpact: o.sim !== undefined ? o.sim : DEFAULT_RIPPLE_TUNING.showImpact,
+    showSplash: o.ssp !== undefined ? o.ssp : DEFAULT_RIPPLE_TUNING.showSplash,
+    showAmbient: o.sam !== undefined ? o.sam : DEFAULT_RIPPLE_TUNING.showAmbient,
+});
 const decompressSonnet = (o: any): any => ({
     cameraIntensity: o.ci !== undefined ? o.ci : DEFAULT_SONNET_TUNING.cameraIntensity,
     typographyMotion: o.tm !== undefined ? o.tm : DEFAULT_SONNET_TUNING.typographyMotion,
@@ -496,6 +529,7 @@ export const compressConfig = (config: any): string => {
     if (config.monetTuning) minified.mt = compressMonet(config.monetTuning);
     if (config.pendoloTuning) minified.pdt = compressPendolo(config.pendoloTuning);
     if (config.sonnetTuning) minified.snt = compressSonnet(config.sonnetTuning);
+    if (config.rippleTuning) minified.rpl = compressRipple(config.rippleTuning);
     if (config.temperaTuning) minified.tmp = compressTempera(config.temperaTuning);
     if (config.urlBackgroundList) minified.ubl = config.urlBackgroundList;
     if (config.urlBackgroundSelectedId) minified.ubid = config.urlBackgroundSelectedId;
@@ -609,6 +643,7 @@ export const decompressConfig = (str: string): any => {
         if (parsed.mt) decompressed.monetTuning = decompressMonet(parsed.mt);
         if (parsed.pdt) decompressed.pendoloTuning = decompressPendolo(parsed.pdt);
         if (parsed.snt) decompressed.sonnetTuning = decompressSonnet(parsed.snt);
+        if (parsed.rpl) decompressed.rippleTuning = decompressRipple(parsed.rpl);
         if (parsed.tmp) decompressed.temperaTuning = decompressTempera(parsed.tmp);
         if (parsed.ubl) decompressed.urlBackgroundList = parsed.ubl;
         if (parsed.ubid) decompressed.urlBackgroundSelectedId = parsed.ubid;
@@ -630,7 +665,7 @@ export const decompressConfig = (str: string): any => {
             'subtitleFontFallbackFamilies', 'visualizerTunings', 'classicTuning',
             'cadenzaTuning', 'partitaTuning', 'fumeTuning', 'claddaghTuning', 'cappellaTuning',
             'tiltTuning', 'dioramaTuning', 'monetBackgroundTuning', 'nomandBackgroundTuning', 'latentBackgroundTuning', 'monetTuning',
-            'pendoloTuning', 'sonnetTuning', 'temperaTuning',
+            'pendoloTuning', 'sonnetTuning', 'rippleTuning', 'temperaTuning',
             'urlBackgroundList', 'urlBackgroundSelectedId',
             'songThemeAutoSwitchEnabled', 'songThemeAutoGenerateEnabled', 'themeGenerationSource', 'followSystemTheme',
         ];

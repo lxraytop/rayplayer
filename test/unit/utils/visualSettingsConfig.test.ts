@@ -15,7 +15,7 @@ import { buildVisualSettingsConfig } from '@/utils/visualSettingsConfig';
 import { readStoredThemeAutoGenerateEnabled, readStoredThemeAutoSwitchEnabled, readStoredThemeGenerationSource } from '@/services/themePreferences';
 import { compressConfig, decompressConfig } from '@/utils/appearanceCodec';
 import { extractCfgFromInput } from '@/utils/obsUrl';
-import { DEFAULT_SONNET_TUNING } from '@/types';
+import { DEFAULT_RIPPLE_TUNING, DEFAULT_SONNET_TUNING } from '@/types';
 import { useSettingsUiStore } from '@/stores/useSettingsUiStore';
 
 const switchMock = vi.mocked(readStoredThemeAutoSwitchEnabled);
@@ -157,6 +157,24 @@ describe('buildVisualSettingsConfig', () => {
         expect(buildVisualSettingsConfig()).toMatchObject({ sonnetTuning });
         const restored = decompressConfig(extractCfgFromInput(asObsUrl(compressConfig(buildVisualSettingsConfig()))));
         expect(restored.sonnetTuning).toEqual(sonnetTuning);
+    });
+
+    it('carries the Ripple style tuning and round-trips it through a copied OBS URL', () => {
+        const rippleTuning = {
+            ...DEFAULT_RIPPLE_TUNING,
+            fontScale: 1.35,
+            animationSpeed: 1.6,
+            rippleStrength: 1.45,
+            waterDistortion: 0.4,
+            dropHeight: 1.8,
+            showReflection: false,
+            showAmbient: false,
+        };
+        useSettingsUiStore.setState({ rippleTuning });
+
+        expect(buildVisualSettingsConfig()).toMatchObject({ rippleTuning });
+        const restored = decompressConfig(extractCfgFromInput(asObsUrl(compressConfig(buildVisualSettingsConfig()))));
+        expect(restored.rippleTuning).toEqual(rippleTuning);
     });
 
     it('carries the theme generation source through compress and decompress', () => {

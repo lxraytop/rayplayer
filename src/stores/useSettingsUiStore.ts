@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import type React from 'react';
-import { DEFAULT_CADENZA_TUNING, DEFAULT_CAPPELLA_TUNING, DEFAULT_CLASSIC_TUNING, DEFAULT_CLADDAGH_TUNING, DEFAULT_DIORAMA_TUNING, DEFAULT_FUME_TUNING, DEFAULT_LATENT_BACKGROUND_TUNING, DEFAULT_MONET_BACKGROUND_TUNING, DEFAULT_MONET_TUNING, DEFAULT_NOMAND_BACKGROUND_TUNING, DEFAULT_PARTITA_TUNING, DEFAULT_PENDOLO_TUNING, DEFAULT_SONNET_TUNING, DEFAULT_TEMPERA_LAYER_IMAGE, DEFAULT_TEMPERA_TUNING, DEFAULT_TILT_TUNING, DIORAMA_PARTICLE_DENSITY_MAX, DIORAMA_PARTICLE_DENSITY_MIN, DIORAMA_PARTICLE_GLOW_INTENSITY_MAX, DIORAMA_PARTICLE_GLOW_INTENSITY_MIN, DIORAMA_PARTICLE_SIZE_MAX, DIORAMA_PARTICLE_SIZE_MIN, TEMPERA_MAX_LAYER_IMAGES, type CadenzaTuning, type CappellaAvatarImage, type CappellaAvatarSource, type CappellaEmojiImage, type CappellaTuning, type ClassicTuning, type CladdaghTuning, type DioramaTuning, type FumeTuning, type LatentBackgroundColorSource, type LatentBackgroundDisplayMode, type LatentBackgroundTuning, type LocalLyricsPriority, type LyricProviderSource, type MonetBackgroundImage, type MonetBackgroundLayout, type MonetBackgroundSource, type MonetBackgroundTuning, type MonetBackgroundWashColorMode, type MonetPortraitImage, type MonetPortraitSource, type MonetTuning, type NomandBackgroundDitheringType, type NomandBackgroundEffect, type NomandBackgroundSource, type NomandBackgroundTuning, type PartitaTuning, type PendoloTuning, type QueueAddBehavior, type SonnetTuning, type StatusMessage, type StoredCappellaAvatarImage, type StoredCappellaEmojiImage, type StoredCustomLyricsFont, type StoredMonetBackgroundImage, type StoredMonetPortraitImage, type SubtitleContentMode, type TemperaLayerImage, type TemperaTuning, type Theme, type TiltTuning, type UrlBackgroundItem, type VisualizerBackgroundMode, type VisualizerFrameRate, type VisualizerMode } from '../types';
+import { DEFAULT_CADENZA_TUNING, DEFAULT_CAPPELLA_TUNING, DEFAULT_CLASSIC_TUNING, DEFAULT_CLADDAGH_TUNING, DEFAULT_DIORAMA_TUNING, DEFAULT_FUME_TUNING, DEFAULT_LATENT_BACKGROUND_TUNING, DEFAULT_MONET_BACKGROUND_TUNING, DEFAULT_MONET_TUNING, DEFAULT_NOMAND_BACKGROUND_TUNING, DEFAULT_PARTITA_TUNING, DEFAULT_PENDOLO_TUNING, DEFAULT_RIPPLE_TUNING, DEFAULT_SONNET_TUNING, DEFAULT_TEMPERA_LAYER_IMAGE, DEFAULT_TEMPERA_TUNING, DEFAULT_TILT_TUNING, DIORAMA_PARTICLE_DENSITY_MAX, DIORAMA_PARTICLE_DENSITY_MIN, DIORAMA_PARTICLE_GLOW_INTENSITY_MAX, DIORAMA_PARTICLE_GLOW_INTENSITY_MIN, DIORAMA_PARTICLE_SIZE_MAX, DIORAMA_PARTICLE_SIZE_MIN, RIPPLE_TUNING_LIMITS, TEMPERA_MAX_LAYER_IMAGES, type CadenzaTuning, type CappellaAvatarImage, type CappellaAvatarSource, type CappellaEmojiImage, type CappellaTuning, type ClassicTuning, type CladdaghTuning, type DioramaTuning, type FumeTuning, type LatentBackgroundColorSource, type LatentBackgroundDisplayMode, type LatentBackgroundTuning, type LocalLyricsPriority, type LyricProviderSource, type MonetBackgroundImage, type MonetBackgroundLayout, type MonetBackgroundSource, type MonetBackgroundTuning, type MonetBackgroundWashColorMode, type MonetPortraitImage, type MonetPortraitSource, type MonetTuning, type NomandBackgroundDitheringType, type NomandBackgroundEffect, type NomandBackgroundSource, type NomandBackgroundTuning, type PartitaTuning, type PendoloTuning, type QueueAddBehavior, type RippleTuning, type SonnetTuning, type StatusMessage, type StoredCappellaAvatarImage, type StoredCappellaEmojiImage, type StoredCustomLyricsFont, type StoredMonetBackgroundImage, type StoredMonetPortraitImage, type SubtitleContentMode, type TemperaLayerImage, type TemperaTuning, type Theme, type TiltTuning, type UrlBackgroundItem, type VisualizerBackgroundMode, type VisualizerFrameRate, type VisualizerMode } from '../types';
 import { DEFAULT_VISUALIZER_MODE, getVisualizerModeLabel, getVisualizerRegistryEntry, hasVisualizerMode } from '../components/visualizer/registry';
 import { DEFAULT_VISUALIZER_BACKGROUND_MODE, hasVisualizerBackgroundMode } from '../components/visualizer/backgrounds/registry';
 import { resolveDioramaMoteCircumference, resolveDioramaMoteRadial } from '../components/visualizer/diorama/dioramaMoteField';
@@ -542,6 +542,59 @@ const readStoredSonnetTuning = (): SonnetTuning => {
         return DEFAULT_SONNET_TUNING;
     }
 };
+
+/**
+ * Reads the persisted Ripple style. The range table is shared with the settings panel and the setter
+ * so a hand-edited localStorage value can never put a field outside what the slider can reach, and a
+ * missing/partial record falls back per field rather than dropping the whole tuning.
+ */
+const readStoredRippleTuning = (): RippleTuning => {
+    if (typeof window === 'undefined') return DEFAULT_RIPPLE_TUNING;
+    const saved = localStorage.getItem('ripple_tuning');
+    if (!saved) return DEFAULT_RIPPLE_TUNING;
+    try {
+        const parsed = JSON.parse(saved) as Partial<RippleTuning>;
+        return {
+            fontScale: resolvePendoloNumber(parsed.fontScale, DEFAULT_RIPPLE_TUNING.fontScale, RIPPLE_TUNING_LIMITS.fontScale.min, RIPPLE_TUNING_LIMITS.fontScale.max),
+            animationSpeed: resolvePendoloNumber(parsed.animationSpeed, DEFAULT_RIPPLE_TUNING.animationSpeed, RIPPLE_TUNING_LIMITS.animationSpeed.min, RIPPLE_TUNING_LIMITS.animationSpeed.max),
+            rippleStrength: resolvePendoloNumber(parsed.rippleStrength, DEFAULT_RIPPLE_TUNING.rippleStrength, RIPPLE_TUNING_LIMITS.rippleStrength.min, RIPPLE_TUNING_LIMITS.rippleStrength.max),
+            splashStrength: resolvePendoloNumber(parsed.splashStrength, DEFAULT_RIPPLE_TUNING.splashStrength, RIPPLE_TUNING_LIMITS.splashStrength.min, RIPPLE_TUNING_LIMITS.splashStrength.max),
+            ambientStrength: resolvePendoloNumber(parsed.ambientStrength, DEFAULT_RIPPLE_TUNING.ambientStrength, RIPPLE_TUNING_LIMITS.ambientStrength.min, RIPPLE_TUNING_LIMITS.ambientStrength.max),
+            waterDistortion: resolvePendoloNumber(parsed.waterDistortion, DEFAULT_RIPPLE_TUNING.waterDistortion, RIPPLE_TUNING_LIMITS.waterDistortion.min, RIPPLE_TUNING_LIMITS.waterDistortion.max),
+            reflectionStrength: resolvePendoloNumber(parsed.reflectionStrength, DEFAULT_RIPPLE_TUNING.reflectionStrength, RIPPLE_TUNING_LIMITS.reflectionStrength.min, RIPPLE_TUNING_LIMITS.reflectionStrength.max),
+            audioReactivity: resolvePendoloNumber(parsed.audioReactivity, DEFAULT_RIPPLE_TUNING.audioReactivity, RIPPLE_TUNING_LIMITS.audioReactivity.min, RIPPLE_TUNING_LIMITS.audioReactivity.max),
+            dropHeight: resolvePendoloNumber(parsed.dropHeight, DEFAULT_RIPPLE_TUNING.dropHeight, RIPPLE_TUNING_LIMITS.dropHeight.min, RIPPLE_TUNING_LIMITS.dropHeight.max),
+            showWaterSurface: typeof parsed.showWaterSurface === 'boolean' ? parsed.showWaterSurface : DEFAULT_RIPPLE_TUNING.showWaterSurface,
+            showReflection: typeof parsed.showReflection === 'boolean' ? parsed.showReflection : DEFAULT_RIPPLE_TUNING.showReflection,
+            showImpact: typeof parsed.showImpact === 'boolean' ? parsed.showImpact : DEFAULT_RIPPLE_TUNING.showImpact,
+            showSplash: typeof parsed.showSplash === 'boolean' ? parsed.showSplash : DEFAULT_RIPPLE_TUNING.showSplash,
+            showAmbient: typeof parsed.showAmbient === 'boolean' ? parsed.showAmbient : DEFAULT_RIPPLE_TUNING.showAmbient,
+        };
+    } catch {
+        return DEFAULT_RIPPLE_TUNING;
+    }
+};
+
+/**
+ * Clamping used by both the read path and the setter, so a tuning object can only ever leave this
+ * module inside the panel's ranges.
+ */
+const resolveRippleTuning = (patch: Partial<RippleTuning>, prev: RippleTuning): RippleTuning => ({
+    fontScale: resolvePendoloNumber(patch.fontScale, prev.fontScale, RIPPLE_TUNING_LIMITS.fontScale.min, RIPPLE_TUNING_LIMITS.fontScale.max),
+    animationSpeed: resolvePendoloNumber(patch.animationSpeed, prev.animationSpeed, RIPPLE_TUNING_LIMITS.animationSpeed.min, RIPPLE_TUNING_LIMITS.animationSpeed.max),
+    rippleStrength: resolvePendoloNumber(patch.rippleStrength, prev.rippleStrength, RIPPLE_TUNING_LIMITS.rippleStrength.min, RIPPLE_TUNING_LIMITS.rippleStrength.max),
+    splashStrength: resolvePendoloNumber(patch.splashStrength, prev.splashStrength, RIPPLE_TUNING_LIMITS.splashStrength.min, RIPPLE_TUNING_LIMITS.splashStrength.max),
+    ambientStrength: resolvePendoloNumber(patch.ambientStrength, prev.ambientStrength, RIPPLE_TUNING_LIMITS.ambientStrength.min, RIPPLE_TUNING_LIMITS.ambientStrength.max),
+    waterDistortion: resolvePendoloNumber(patch.waterDistortion, prev.waterDistortion, RIPPLE_TUNING_LIMITS.waterDistortion.min, RIPPLE_TUNING_LIMITS.waterDistortion.max),
+    reflectionStrength: resolvePendoloNumber(patch.reflectionStrength, prev.reflectionStrength, RIPPLE_TUNING_LIMITS.reflectionStrength.min, RIPPLE_TUNING_LIMITS.reflectionStrength.max),
+    audioReactivity: resolvePendoloNumber(patch.audioReactivity, prev.audioReactivity, RIPPLE_TUNING_LIMITS.audioReactivity.min, RIPPLE_TUNING_LIMITS.audioReactivity.max),
+    dropHeight: resolvePendoloNumber(patch.dropHeight, prev.dropHeight, RIPPLE_TUNING_LIMITS.dropHeight.min, RIPPLE_TUNING_LIMITS.dropHeight.max),
+    showWaterSurface: typeof patch.showWaterSurface === 'boolean' ? patch.showWaterSurface : prev.showWaterSurface,
+    showReflection: typeof patch.showReflection === 'boolean' ? patch.showReflection : prev.showReflection,
+    showImpact: typeof patch.showImpact === 'boolean' ? patch.showImpact : prev.showImpact,
+    showSplash: typeof patch.showSplash === 'boolean' ? patch.showSplash : prev.showSplash,
+    showAmbient: typeof patch.showAmbient === 'boolean' ? patch.showAmbient : prev.showAmbient,
+});
 
 const clampUnit = (value: unknown, fallback: number) => (
     typeof value === 'number' && Number.isFinite(value) ? Math.min(1, Math.max(0, value)) : fallback
@@ -1375,6 +1428,7 @@ export type SettingsUiState = {
     monetTuning: MonetTuning;
     pendoloTuning: PendoloTuning;
     sonnetTuning: SonnetTuning;
+    rippleTuning: RippleTuning;
     temperaTuning: TemperaTuning;
     storedCappellaEmojiPack: StoredCappellaEmojiImage[];
     cappellaCustomEmojiImages: CappellaEmojiImage[];
@@ -1526,6 +1580,8 @@ export type SettingsUiState = {
     handleResetPendoloTuning: () => void;
     handleSetSonnetTuning: (patch: Partial<SonnetTuning>) => void;
     handleResetSonnetTuning: () => void;
+    handleSetRippleTuning: (patch: Partial<RippleTuning>) => void;
+    handleResetRippleTuning: () => void;
     handleSetTemperaTuning: (patch: Partial<TemperaTuning>) => void;
     handleResetTemperaTuning: () => void;
     handleUploadMonetBackgroundImage: (files: File[]) => Promise<{ ok: boolean; error?: string; }>;
@@ -1646,6 +1702,7 @@ export const useSettingsUiStore = create<SettingsUiState>((set, get) => ({
     monetTuning: readStoredMonetTuning(),
     pendoloTuning: readStoredPendoloTuning(),
     sonnetTuning: readStoredSonnetTuning(),
+    rippleTuning: readStoredRippleTuning(),
     temperaTuning: readStoredTemperaTuning(),
     storedCappellaEmojiPack: [],
     cappellaCustomEmojiImages: [],
@@ -2383,6 +2440,19 @@ export const useSettingsUiStore = create<SettingsUiState>((set, get) => ({
         set({ sonnetTuning: DEFAULT_SONNET_TUNING });
         notify(get, { type: 'info', text: i18n.t('notifications.sonnetReset') });
     },
+    handleSetRippleTuning: (patch: Partial<RippleTuning>) => {
+        const prev = get().rippleTuning;
+        const next = resolveRippleTuning(patch, prev);
+        if (typeof window !== 'undefined') localStorage.setItem('ripple_tuning', JSON.stringify(next));
+        set({ rippleTuning: next });
+    },
+    handleResetRippleTuning: () => {
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('ripple_tuning', JSON.stringify(DEFAULT_RIPPLE_TUNING));
+        }
+        set({ rippleTuning: DEFAULT_RIPPLE_TUNING });
+        notify(get, { type: 'info', text: i18n.t('notifications.rippleReset') });
+    },
     handleSetTemperaTuning: (patch: Partial<TemperaTuning>) => {
         const prev = get().temperaTuning;
         const next: TemperaTuning = {
@@ -3084,6 +3154,7 @@ export const selectSettingsUiSnapshot = (state: SettingsUiState) => ({
     monetTuning: state.monetTuning,
     pendoloTuning: state.pendoloTuning,
     sonnetTuning: state.sonnetTuning,
+    rippleTuning: state.rippleTuning,
     temperaTuning: state.temperaTuning,
     cappellaCustomEmojiImages: state.cappellaCustomEmojiImages,
     isLoadingCappellaCustomEmojiPack: state.isLoadingCappellaCustomEmojiPack,
@@ -3193,6 +3264,8 @@ export const selectSettingsUiSnapshot = (state: SettingsUiState) => ({
     handleResetPendoloTuning: state.handleResetPendoloTuning,
     handleSetSonnetTuning: state.handleSetSonnetTuning,
     handleResetSonnetTuning: state.handleResetSonnetTuning,
+    handleSetRippleTuning: state.handleSetRippleTuning,
+    handleResetRippleTuning: state.handleResetRippleTuning,
     handleSetTemperaTuning: state.handleSetTemperaTuning,
     handleResetTemperaTuning: state.handleResetTemperaTuning,
     handleUploadMonetBackgroundImage: state.handleUploadMonetBackgroundImage,

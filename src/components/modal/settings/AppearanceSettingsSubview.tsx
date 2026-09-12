@@ -171,6 +171,7 @@ const AppearanceSettingsSubview: React.FC<AppearanceSettingsSubviewProps> = ({
         monetTuning: state.monetTuning,
         pendoloTuning: state.pendoloTuning,
         sonnetTuning: state.sonnetTuning,
+        rippleTuning: state.rippleTuning,
         temperaTuning: state.temperaTuning,
         urlBackgroundList: state.urlBackgroundList,
         urlBackgroundSelectedId: state.urlBackgroundSelectedId,
@@ -216,6 +217,7 @@ const AppearanceSettingsSubview: React.FC<AppearanceSettingsSubviewProps> = ({
         handleSetMonetTuning: state.handleSetMonetTuning,
         handleSetPendoloTuning: state.handleSetPendoloTuning,
         handleSetSonnetTuning: state.handleSetSonnetTuning,
+        handleSetRippleTuning: state.handleSetRippleTuning,
         handleSetTemperaTuning: state.handleSetTemperaTuning,
         handleAddUrlBackgroundItem: state.handleAddUrlBackgroundItem,
         handleUpdateUrlBackgroundItem: state.handleUpdateUrlBackgroundItem,
@@ -474,6 +476,7 @@ const AppearanceSettingsSubview: React.FC<AppearanceSettingsSubviewProps> = ({
                 if (has('monetTuning') && config.monetTuning) store.handleSetMonetTuning(config.monetTuning);
                 if (has('pendoloTuning') && config.pendoloTuning) store.handleSetPendoloTuning(config.pendoloTuning);
                 if (has('sonnetTuning') && config.sonnetTuning) store.handleSetSonnetTuning(config.sonnetTuning);
+                if (has('rippleTuning') && config.rippleTuning) store.handleSetRippleTuning(config.rippleTuning);
                 if (has('temperaTuning') && config.temperaTuning) store.handleSetTemperaTuning(config.temperaTuning);
             }
 

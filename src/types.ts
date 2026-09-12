@@ -575,6 +575,78 @@ export const DEFAULT_SONNET_TUNING: SonnetTuning = {
 };
 
 /**
+ * User-tunable style for the Ripple lyric mode. Every field is a plain scalar so the whole object
+ * stays JSON-small enough to ride the appearance shortcode and the settings sync record.
+ *
+ * The mode's look is derived from geometry constants in `rippleVisuals.ts`; this tuning is the
+ * *multiplier* layer on top of them, so a default of 1 reproduces the shipped look exactly and the
+ * panel can always offer a "reset to default" that returns to it.
+ */
+export interface RippleTuning {
+  /** Extra lyric font-size multiplier layered on top of the shared lyrics font scale. */
+  fontScale: number;
+  /** Playback speed multiplier applied to every ripple / splash / sway animation duration. */
+  animationSpeed: number;
+  /** Opacity of the impact wave train and splash crown. */
+  rippleStrength: number;
+  /** Opacity of the droplet fan thrown clear of the crater. */
+  splashStrength: number;
+  /** Opacity of the ambient rings that keep the waterline alive between drops. */
+  ambientStrength: number;
+  /** How far the water bends the mirrored lyric (SVG displacement scale). */
+  waterDistortion: number;
+  /** Visibility of the mirrored reflection under the waterline. */
+  reflectionStrength: number;
+  /** How strongly playback audio energy drives the whole surface. */
+  audioReactivity: number;
+  /** Airborne lift of pending words, in `em` of the lyric font — the height a word falls from. */
+  dropHeight: number;
+  /** Draw the water surface itself: plane wash, caustics, sheen and the waterline. */
+  showWaterSurface: boolean;
+  /** Draw the mirrored reflection under the waterline. */
+  showReflection: boolean;
+  /** Draw the crater and wave train at every impact. */
+  showImpact: boolean;
+  /** Draw the droplet fan thrown up at impact. */
+  showSplash: boolean;
+  /** Draw the ambient rings that keep the surface moving between drops. */
+  showAmbient: boolean;
+}
+
+/**
+ * Allowed range for each numeric Ripple field, shared by the settings panel sliders and the store's
+ * clamping setter so the two can never disagree about what "out of range" means.
+ */
+export const RIPPLE_TUNING_LIMITS = {
+  fontScale: { min: 0.6, max: 2 },
+  animationSpeed: { min: 0.4, max: 2.2 },
+  rippleStrength: { min: 0, max: 2 },
+  splashStrength: { min: 0, max: 2 },
+  ambientStrength: { min: 0, max: 2 },
+  waterDistortion: { min: 0, max: 2.5 },
+  reflectionStrength: { min: 0, max: 1.5 },
+  audioReactivity: { min: 0, max: 2 },
+  dropHeight: { min: 0.25, max: 2 },
+} as const;
+
+export const DEFAULT_RIPPLE_TUNING: RippleTuning = {
+  fontScale: 1,
+  animationSpeed: 1,
+  rippleStrength: 1,
+  splashStrength: 1,
+  ambientStrength: 1,
+  waterDistortion: 1,
+  reflectionStrength: 1,
+  audioReactivity: 1,
+  dropHeight: 1,
+  showWaterSurface: true,
+  showReflection: true,
+  showImpact: true,
+  showSplash: true,
+  showAmbient: true,
+};
+
+/**
  * `gradient` fills every tone shape with a four-colour ramp built from the cover art's
  * extracted colours mixed with the theme, instead of a flat tone.
  */

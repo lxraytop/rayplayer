@@ -189,6 +189,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
         monetTuning,
         pendoloTuning,
         sonnetTuning,
+        rippleTuning,
         temperaTuning,
         cappellaCustomEmojiImages,
         isLoadingCappellaCustomEmojiPack,
@@ -266,6 +267,8 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
         handleResetPendoloTuning: onResetPendoloTuning,
         handleSetSonnetTuning: onSonnetTuningChange,
         handleResetSonnetTuning: onResetSonnetTuning,
+        handleSetRippleTuning: onRippleTuningChange,
+        handleResetRippleTuning: onResetRippleTuning,
         handleSetTemperaTuning: onTemperaTuningChange,
         handleResetTemperaTuning: onResetTemperaTuning,
         handleUploadMonetBackgroundImage: onUploadMonetBackgroundImage,
@@ -1785,6 +1788,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                         monetTuning={monetTuning}
                         pendoloTuning={pendoloTuning}
                         sonnetTuning={sonnetTuning}
+                        rippleTuning={rippleTuning}
                         temperaTuning={temperaTuning}
                         cappellaCustomEmojiImages={cappellaCustomEmojiImages}
                         cappellaCustomAvatarImages={cappellaCustomAvatarImages}
@@ -1842,6 +1846,8 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                         onResetPendoloTuning={onResetPendoloTuning}
                         onSonnetTuningChange={onSonnetTuningChange}
                         onResetSonnetTuning={onResetSonnetTuning}
+                        onRippleTuningChange={onRippleTuningChange}
+                        onResetRippleTuning={onResetRippleTuning}
                         onTemperaTuningChange={onTemperaTuningChange}
                         onResetTemperaTuning={onResetTemperaTuning}
                         onUploadMonetPortraitImage={onUploadMonetPortraitImage}
@@ -1875,6 +1881,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
                             monet: monetTuning,
                             pendolo: pendoloTuning,
                             sonnet: sonnetTuning,
+                            ripple: rippleTuning,
                             tempera: temperaTuning,
                         }}
                         staticMode={staticMode}

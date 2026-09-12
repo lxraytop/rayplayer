@@ -11,6 +11,7 @@ import {
     type MonetTuning,
     type PartitaTuning,
     type PendoloTuning,
+    type RippleTuning,
     type SonnetTuning,
     type TemperaTuning,
     type Theme,
@@ -105,6 +106,8 @@ interface VisPlaygroundSettingsPanelProps {
     onPendoloTuningChange?: (patch: Partial<PendoloTuning>) => void;
     sonnetTuning?: SonnetTuning;
     onSonnetTuningChange?: (patch: Partial<SonnetTuning>) => void;
+    rippleTuning?: RippleTuning;
+    onRippleTuningChange?: (patch: Partial<RippleTuning>) => void;
     temperaTuning?: TemperaTuning;
     onTemperaTuningChange?: (patch: Partial<TemperaTuning>) => void;
     cappellaTuning: CappellaTuning;
@@ -367,6 +370,8 @@ const VisPlaygroundSettingsPanel: React.FC<VisPlaygroundSettingsPanelProps> = (p
         onPendoloTuningChange,
         sonnetTuning,
         onSonnetTuningChange,
+        rippleTuning,
+        onRippleTuningChange,
         temperaTuning,
         onTemperaTuningChange,
         monetPortraitImage,
@@ -720,6 +725,8 @@ const VisPlaygroundSettingsPanel: React.FC<VisPlaygroundSettingsPanelProps> = (p
                             onPendoloTuningChange,
                             sonnetTuning,
                             onSonnetTuningChange,
+                            rippleTuning,
+                            onRippleTuningChange,
                             temperaTuning,
                             onTemperaTuningChange,
                             monetPortraitImage,

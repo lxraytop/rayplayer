@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { DEFAULT_DIORAMA_TUNING, DEFAULT_SONNET_TUNING } from '../../../src/types';
+import { DEFAULT_DIORAMA_TUNING, DEFAULT_RIPPLE_TUNING, DEFAULT_SONNET_TUNING } from '../../../src/types';
 import {
     applyVisualizerTuningsToSettings,
     collectVisualizerTunings,
@@ -19,6 +19,7 @@ describe('visualizer tuning registry', () => {
             'monet',
             'partita',
             'pendolo',
+            'ripple',
             'sonnet',
             'tempera',
             'tilt',
@@ -47,5 +48,17 @@ describe('visualizer tuning registry', () => {
         expect(collectVisualizerTunings(settings).sonnet).toEqual(DEFAULT_SONNET_TUNING);
         applyVisualizerTuningsToSettings(settings, { sonnet: DEFAULT_SONNET_TUNING });
         expect(handleSetSonnetTuning).toHaveBeenCalledWith(DEFAULT_SONNET_TUNING);
+    });
+
+    it('collects and applies Ripple tuning through its discovered adapter', () => {
+        const handleSetRippleTuning = vi.fn();
+        const settings = {
+            rippleTuning: DEFAULT_RIPPLE_TUNING,
+            handleSetRippleTuning,
+        };
+
+        expect(collectVisualizerTunings(settings).ripple).toEqual(DEFAULT_RIPPLE_TUNING);
+        applyVisualizerTuningsToSettings(settings, { ripple: DEFAULT_RIPPLE_TUNING });
+        expect(handleSetRippleTuning).toHaveBeenCalledWith(DEFAULT_RIPPLE_TUNING);
     });
 });

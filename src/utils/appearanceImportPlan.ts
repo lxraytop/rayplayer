@@ -90,6 +90,7 @@ const FIELD_GROUPS: Record<string, ImportGroup> = {
     monetTuning: 'visualizer',
     pendoloTuning: 'visualizer',
     sonnetTuning: 'visualizer',
+    rippleTuning: 'visualizer',
     temperaTuning: 'visualizer',
 
     lyricsFontStyle: 'fonts',
@@ -152,6 +153,7 @@ const TRUTHY_GUARDED_FIELDS = new Set([
     'monetTuning',
     'pendoloTuning',
     'sonnetTuning',
+    'rippleTuning',
     'temperaTuning',
     'monetBackgroundTuning',
     'nomandBackgroundTuning',
@@ -173,6 +175,7 @@ const BUNDLED_TUNING_FIELDS = new Set([
     'monetTuning',
     'pendoloTuning',
     'sonnetTuning',
+    'rippleTuning',
     'temperaTuning',
 ]);
 
