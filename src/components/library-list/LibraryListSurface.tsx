@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { List as VirtualList } from 'react-window';
+import { LIBRARY_LIST_OVERSCAN_COUNT } from './listMetrics';
 
 // src/components/library-list/LibraryListSurface.tsx
 // Main-area virtualized list shared by the card / list toggles. It measures its own height and
@@ -16,6 +17,13 @@ export interface LibraryListSurfaceProps<T> {
     header?: React.ReactNode;
     footer?: React.ReactNode;
     className?: string;
+    /**
+     * Extra classes for the scrolling viewport. Callers use it to inset the list from chrome that
+     * is pinned to the edges of the surface (top control pills, floating player) so the first and
+     * last rows stay reachable and visible. Margins are used rather than padding because the
+     * measured `clientHeight` is handed to react-window as the scroll height.
+     */
+    viewportClassName?: string;
     ariaLabel?: string;
 }
 
@@ -33,6 +41,7 @@ export function LibraryListSurface<T>({
     header,
     footer,
     className = '',
+    viewportClassName = '',
     ariaLabel,
 }: LibraryListSurfaceProps<T>) {
     const containerRef = useRef<HTMLDivElement>(null);
@@ -92,6 +101,7 @@ export function LibraryListSurface<T>({
                 rowHeight={rowHeight}
                 rowProps={rowProps}
                 rowComponent={RowComponent}
+                overscanCount={LIBRARY_LIST_OVERSCAN_COUNT}
                 className="overflow-x-hidden custom-scrollbar"
             />
         )
@@ -100,7 +110,7 @@ export function LibraryListSurface<T>({
     return (
         <div className={`w-full h-full min-h-0 flex flex-col ${className}`} aria-label={ariaLabel}>
             {header}
-            <div ref={containerRef} className="flex-1 min-h-0 relative">
+            <div ref={containerRef} className={`flex-1 min-h-0 relative ${viewportClassName}`}>
                 {content}
             </div>
             {footer}

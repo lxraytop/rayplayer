@@ -2200,8 +2200,13 @@ export const GridView: React.FC<GridViewProps> = ({
 
                     dragControls.start(event);
                 }}
-                className="w-full flex-1 relative flex items-center justify-center cursor-grab active:cursor-grabbing overflow-hidden"
-                style={{ touchAction: 'none' }}
+                className={`w-full flex-1 relative flex items-center justify-center overflow-hidden ${
+                    isPlaylistListView ? 'cursor-default' : 'cursor-grab active:cursor-grabbing'
+                }`}
+                // `touch-action: none` is what lets the honeycomb canvas be dragged, but it would
+                // also stop the track list from scrolling with a finger, so it only applies to the
+                // card canvas.
+                style={{ touchAction: isPlaylistListView ? 'auto' : 'none' }}
             >
                 {isPlaylistListView ? (
                     <PlaylistTrackListView
@@ -2213,6 +2218,7 @@ export const GridView: React.FC<GridViewProps> = ({
                         onAddToQueue={onAddTrackToQueue}
                         isLoading={isLoading || externalTracksLoading}
                         emptyMessage={t('home.loadingLibrary')}
+                        infoPanelOpen={showCutInPanel && mode === 'tracks' && Boolean(collection)}
                         toolbar={supportsLocalTrackSorting ? (
                             <>
                                 <LocalTrackSortDirectionButton
