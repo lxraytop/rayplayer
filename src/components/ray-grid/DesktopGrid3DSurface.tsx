@@ -267,6 +267,7 @@ export const DesktopGrid3DSurface: React.FC<DesktopGrid3DSurfaceProps> = ({
                     onSelect={handleVisibleSelect}
                     isLoading={isLoading}
                     emptyMessage={emptyMessage}
+                    hasFloatingPlayer={hasFloatingPlayer}
                     ariaLabel={title}
                 />
             ) : (

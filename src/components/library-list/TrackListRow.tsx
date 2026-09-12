@@ -2,8 +2,9 @@ import React from 'react';
 import { Play, Plus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import type { SongResult } from '../../types';
-import { getSizedCoverUrl } from '../../utils/coverUrl';
 import { getSongArtistLabel, getSongCoverUrl } from '../../services/onlineMusic/songMetadata';
+import { ListCoverThumb } from './ListCoverThumb';
+import { LIBRARY_LIST_CONTENT_CLASS } from './listMetrics';
 import { formatTrackDurationMs } from './trackListFormat';
 
 // src/components/library-list/TrackListRow.tsx
@@ -40,7 +41,7 @@ export const TrackListRow = React.memo<TrackListRowProps>(({
         <div style={style} className="px-4 sm:px-8">
             <div
                 onClick={isUnavailable ? undefined : onPlay}
-                className={`group flex h-full items-center gap-3 rounded-xl px-3 transition-colors ${
+                className={`group ${LIBRARY_LIST_CONTENT_CLASS} flex h-full items-center gap-3 rounded-xl px-3 transition-colors ${
                     isUnavailable
                         ? 'opacity-40 cursor-not-allowed'
                         : isFocused
@@ -55,21 +56,19 @@ export const TrackListRow = React.memo<TrackListRowProps>(({
                     {index + 1}
                 </span>
 
-                <div className="relative w-9 h-9 shrink-0 overflow-hidden rounded-md bg-zinc-200 dark:bg-zinc-800">
-                    {coverUrl ? (
-                        <img
-                            src={getSizedCoverUrl(coverUrl, 50)}
-                            alt={track.name}
-                            className="w-full h-full object-cover"
-                            loading="lazy"
-                        />
-                    ) : null}
+                <ListCoverThumb
+                    src={coverUrl}
+                    size={50}
+                    alt={track.name}
+                    label={track.name}
+                    className="w-9 h-9 rounded-md"
+                >
                     {!isUnavailable && (
                         <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
                             <Play size={14} className="fill-white text-white ml-0.5" />
                         </div>
                     )}
-                </div>
+                </ListCoverThumb>
 
                 <div className="flex min-w-0 flex-[2] flex-col justify-center">
                     <div className="truncate text-sm font-semibold leading-tight">{track.name}</div>

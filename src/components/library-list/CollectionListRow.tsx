@@ -1,7 +1,8 @@
 import React from 'react';
 import { Play } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { getSizedCoverUrl } from '../../utils/coverUrl';
+import { ListCoverThumb } from './ListCoverThumb';
+import { LIBRARY_LIST_CONTENT_CLASS } from './listMetrics';
 
 // src/components/library-list/CollectionListRow.tsx
 // Regular-player style row for a home collection (playlist / album / radio) shown when the home
@@ -33,13 +34,12 @@ export const CollectionListRow = React.memo<CollectionListRowProps>(({
     onClick,
 }) => {
     const { t } = useTranslation();
-    const coverUrl = item.coverUrl ? getSizedCoverUrl(item.coverUrl, 128) : '';
 
     return (
         <div style={style} className="px-4 sm:px-8">
             <div
                 onClick={onClick}
-                className={`group flex h-full items-center gap-4 rounded-xl px-3 transition-colors cursor-pointer ${
+                className={`group ${LIBRARY_LIST_CONTENT_CLASS} flex h-full items-center gap-4 rounded-xl px-3 transition-colors cursor-pointer ${
                     isFocused
                         ? 'bg-black/10 dark:bg-white/10'
                         : 'hover:bg-black/5 dark:hover:bg-white/5'
@@ -52,19 +52,17 @@ export const CollectionListRow = React.memo<CollectionListRowProps>(({
                     {index + 1}
                 </span>
 
-                <div className="relative w-11 h-11 shrink-0 overflow-hidden rounded-lg bg-zinc-200 dark:bg-zinc-800">
-                    {coverUrl ? (
-                        <img
-                            src={coverUrl}
-                            alt={item.name}
-                            className="w-full h-full object-cover"
-                            loading="lazy"
-                        />
-                    ) : null}
+                <ListCoverThumb
+                    src={item.coverUrl}
+                    size={128}
+                    alt={item.name}
+                    label={item.name}
+                    className="w-11 h-11 rounded-lg"
+                >
                     <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
                         <Play size={16} className="fill-white text-white ml-0.5" />
                     </div>
-                </div>
+                </ListCoverThumb>
 
                 <div className="flex min-w-0 flex-1 flex-col justify-center">
                     <div className="truncate text-sm font-semibold leading-tight">{item.name}</div>

@@ -1,7 +1,12 @@
 import React, { useCallback, useMemo } from 'react';
 import type { Grid3DSliderItem } from '../ray-grid/Grid3DSlider';
+import { useLocalCoverPreloader } from '../../hooks/useLocalCoverPreloader';
 import { COLLECTION_LIST_ROW_HEIGHT, CollectionListRow, type CollectionListRowItem } from './CollectionListRow';
 import { LibraryListSurface } from './LibraryListSurface';
+import {
+    LIBRARY_LIST_BOTTOM_INSET_CLASS,
+    LIBRARY_LIST_TOP_INSET_CLASS,
+} from './listMetrics';
 import { resolveListItemLabel } from './trackListFormat';
 
 // src/components/library-list/Grid3DListView.tsx
@@ -16,6 +21,8 @@ export interface Grid3DListViewProps {
     onSelect: (item: Grid3DSliderItem, index: number) => void;
     isLoading?: boolean;
     emptyMessage?: string;
+    /** Reserves the bottom band when the host renders the floating player. */
+    hasFloatingPlayer?: boolean;
     ariaLabel?: string;
 }
 
@@ -26,6 +33,7 @@ export const Grid3DListView: React.FC<Grid3DListViewProps> = ({
     onSelect,
     isLoading = false,
     emptyMessage,
+    hasFloatingPlayer = false,
     ariaLabel,
 }) => {
     const rows = useMemo<CollectionListRowItem[]>(() => items.map((item) => ({
@@ -35,6 +43,16 @@ export const Grid3DListView: React.FC<Grid3DListViewProps> = ({
         meta: item.summary || item.description || undefined,
         trackCount: typeof item.trackCount === 'number' ? item.trackCount : undefined,
     })), [items]);
+
+    const coverUrls = useMemo(() => items.map(item => item.coverUrl), [items]);
+    const preloadIndexes = useMemo(() => [focusedIndex], [focusedIndex]);
+    useLocalCoverPreloader(coverUrls, preloadIndexes);
+
+    // The home surface pins its control pills to the top with `absolute top-2`; the list has to
+    // start below them instead of rendering its first row underneath.
+    const viewportClassName = hasFloatingPlayer
+        ? `${LIBRARY_LIST_TOP_INSET_CLASS} ${LIBRARY_LIST_BOTTOM_INSET_CLASS}`
+        : LIBRARY_LIST_TOP_INSET_CLASS;
 
     // Keyboard navigation is handled by the list itself; the caller only needs the resolved index.
     const handleKeyDown = useCallback((event: React.KeyboardEvent<HTMLDivElement>) => {
@@ -53,6 +71,7 @@ export const Grid3DListView: React.FC<Grid3DListViewProps> = ({
                 isLoading={isLoading}
                 emptyMessage={emptyMessage}
                 focusedIndex={focusedIndex}
+                viewportClassName={viewportClassName}
                 ariaLabel={ariaLabel}
                 renderRow={(row, index, style) => (
                     <CollectionListRow
