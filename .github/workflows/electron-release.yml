@@ -119,16 +119,7 @@ jobs:
       - name: Package Electron app
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: false
-        shell: bash
-        # macOS is built for Apple Silicon only. `build.mac.target` in package.json still keeps
-        # x64 + arm64 so a local Mac build stays universal; CI narrows it to one arch so the
-        # release ships a single .dmg. Drop the `--arch` override here to publish both again.
-        run: |
-          if [ "$RUNNER_OS" = "macOS" ]; then
-            npx electron-builder --mac --arm64 --publish never
-          else
-            npx electron-builder --publish never
-          fi
+        run: npx electron-builder --publish never
 
       - name: Upload packaged artifacts
         uses: actions/upload-artifact@v6

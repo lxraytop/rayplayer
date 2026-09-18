@@ -3,7 +3,8 @@
   "productName": "Ray",
   "description": "Lyrics Reimagine",
   "author": {
-    "name": "角完"
+    "name": "角完",
+    "email": "rayedu@qq.com"
   },
   "private": true,
   "version": "1.6.0",
@@ -104,14 +105,12 @@
         {
           "target": "dmg",
           "arch": [
-            "x64",
             "arm64"
           ]
         },
         {
           "target": "zip",
           "arch": [
-            "x64",
             "arm64"
           ]
         }
