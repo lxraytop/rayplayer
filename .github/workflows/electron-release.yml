@@ -38,7 +38,16 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        run: npm ci
+        shell: bash
+        # `npm ci` requires package-lock.json to contain every package of the current platform's
+        # ideal tree, but this lock only carries the Windows optional-dependency entries while the
+        # parent packages (e.g. @tailwindcss/oxide, lightningcss) declare all 12 platform variants.
+        # The lock cannot be regenerated either: a from-scratch resolve fails with ERESOLVE
+        # (react 19.3.x vs @react-three/fiber's `>=19 <19.3` peer range), and
+        # `npm install --package-lock-only` silently drops the lock's root `overrides` block.
+        # So keep the reproducible `ci` path when it validates, and fall back to `install`, which
+        # fills in the missing platform packages from the declared optionalDependencies.
+        run: npm ci --no-audit --no-fund || npm install --no-audit --no-fund
 
       - name: Install Rust toolchain
         if: runner.os == 'Linux'
@@ -110,7 +119,16 @@ jobs:
       - name: Package Electron app
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: false
-        run: npx electron-builder --publish never
+        shell: bash
+        # macOS is built for Apple Silicon only. `build.mac.target` in package.json still keeps
+        # x64 + arm64 so a local Mac build stays universal; CI narrows it to one arch so the
+        # release ships a single .dmg. Drop the `--arch` override here to publish both again.
+        run: |
+          if [ "$RUNNER_OS" = "macOS" ]; then
+            npx electron-builder --mac --arm64 --publish never
+          else
+            npx electron-builder --publish never
+          fi
 
       - name: Upload packaged artifacts
         uses: actions/upload-artifact@v6
